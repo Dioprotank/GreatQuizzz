@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Second Life — Aldenreach</title>
+<style>
+  :root {
+    --bg-deep: #0a0812; --bg-mid: #1c1730; --panel: rgba(20,16,36,0.82);
+    --panel-border: rgba(139,127,240,0.25); --accent: #8b7ff0; --accent-soft: #a9a2c8;
+    --text: #efe9ff; --text-dim: #5c5580; --text-mid: #c9c2e8;
+    --danger: #e85d5d; --success: #6bcf8f; --warn: #e8c15d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; width:100%; min-height:100vh; background:var(--bg-deep); color:var(--text); font-family:Georgia,'Iowan Old Style',serif; }
+  #app { width:100%; max-width:460px; margin:0 auto; min-height:100vh; background:radial-gradient(ellipse at top, var(--bg-mid) 0%, var(--bg-deep) 70%); position:relative; display:flex; flex-direction:column; padding-bottom:20px; }
+  .header-bar { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid var(--panel-border); position:sticky; top:0; z-index:50; background:rgba(10,8,18,0.92); backdrop-filter:blur(6px); }
+  .header-bar .htitle { font-size:12px; letter-spacing:2px; color:var(--accent); }
+  .header-bar .hbtns { display:flex; gap:8px; }
+  .hbtn { background:rgba(255,255,255,0.04); border:1px solid var(--panel-border); border-radius:8px; color:var(--accent-soft); font-size:10.5px; padding:5px 9px; cursor:pointer; font-family:inherit; }
+  .hbtn:hover { background:rgba(139,127,240,0.15); color:var(--text); }
+  .screen { padding:24px 18px 40px; flex:1; display:flex; flex-direction:column; animation:fadein 0.35s ease; }
+  @keyframes fadein { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+  .center { align-items:center; justify-content:center; text-align:center; flex:1; }
+  h1.title { font-size:28px; font-weight:400; letter-spacing:3px; margin:0 0 6px; }
+  .subtitle { font-size:13px; color:var(--accent-soft); margin-bottom:40px; }
+  .tagline { font-size:15px; margin-bottom:8px; line-height:1.6; }
+  .btn-primary { background:linear-gradient(135deg,#8b7ff0,#6a5acd); border:none; border-radius:10px; color:#fff; padding:13px 28px; font-size:14px; font-weight:500; letter-spacing:0.5px; cursor:pointer; font-family:inherit; width:100%; margin-bottom:10px; }
+  .btn-primary:disabled { opacity:0.4; cursor:default; }
+  .btn-primary:not(:disabled):hover { filter:brightness(1.1); }
+  .btn-ghost { width:100%; text-align:left; background:rgba(255,255,255,0.03); border:1px solid var(--panel-border); border-radius:10px; color:var(--text); padding:13px 16px; font-size:14px; cursor:pointer; margin-bottom:10px; font-family:inherit; transition:all 0.15s ease; }
+  .btn-ghost:hover { background:rgba(139,127,240,0.14); border-color:rgba(139,127,240,0.6); }
+  .btn-ghost.center-text { text-align:center; }
+  .panel { background:var(--panel); border:1px solid var(--panel-border); border-radius:14px; padding:18px 16px; margin-bottom:14px; }
+  .panel-title { font-size:10.5px; letter-spacing:1.5px; color:var(--accent); margin-bottom:10px; }
+  input[type=text] { width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--panel-border); border-radius:10px; color:var(--text); padding:12px 14px; font-size:15px; font-family:inherit; margin-bottom:20px; }
+  input[type=range] { accent-color: var(--accent); }
+  label.field-label { font-size:11px; letter-spacing:1.5px; color:var(--accent-soft); margin-bottom:8px; display:block; }
+  .stat-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+  .stat-label { width:108px; font-size:11.5px; color:var(--accent-soft); flex-shrink:0; }
+  .stat-bar-track { flex:1; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+  .stat-bar-fill { height:100%; background:var(--accent); border-radius:3px; transition:width 0.6s ease; }
+  .stat-val { width:26px; font-size:11.5px; text-align:right; flex-shrink:0; }
+  .badge { font-size:10px; color:var(--accent); border:1px solid rgba(139,127,240,0.35); border-radius:6px; padding:2px 8px; display:inline-block; }
+  .row-between { display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; }
+  .row-between .rk { color:var(--accent-soft); }
+  .row-between .rv { color:var(--text); }
+  .divider { border-top:1px solid rgba(139,127,240,0.15); margin:10px 0; }
+  .small-note { font-size:10.5px; color:var(--text-dim); line-height:1.5; }
+  .mid-note { font-size:12.5px; color:var(--text-mid); line-height:1.65; }
+  #toast-container { position:fixed; top:54px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:6px; align-items:center; pointer-events:none; width:100%; max-width:460px; }
+  .toast { background:rgba(30,24,50,0.95); border:1px solid var(--panel-border); border-radius:20px; padding:5px 14px; font-size:12px; color:var(--text); box-shadow:0 4px 16px rgba(0,0,0,0.4); animation:toastIn 0.25s ease, toastOut 0.4s ease 1.3s forwards; max-width:88%; text-align:center; }
+  .toast.positive { color:var(--success); border-color:rgba(107,207,143,0.4); }
+  .toast.negative { color:var(--danger); border-color:rgba(232,93,93,0.4); }
+  @keyframes toastIn { from{opacity:0;transform:translateY(-8px) scale(0.9);} to{opacity:1;transform:translateY(0) scale(1);} }
+  @keyframes toastOut { to{opacity:0;transform:translateY(-6px) scale(0.95);} }
+  .dice-box { display:flex; align-items:center; justify-content:center; gap:14px; margin:18px 0; padding:16px; background:rgba(139,127,240,0.06); border:1px solid var(--panel-border); border-radius:12px; }
+  .die { width:52px; height:52px; border-radius:10px; background:linear-gradient(135deg,#2a2348,#1c1730); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:bold; color:var(--text); }
+  .die.rolling { animation:diceRoll 0.08s linear infinite; }
+  @keyframes diceRoll { from{transform:rotate(0deg) scale(1);} to{transform:rotate(15deg) scale(1.05);} }
+  .roll-result-text { font-size:13px; text-align:center; margin-top:8px; }
+  .roll-outcome { font-size:15px; font-weight:bold; text-align:center; margin-top:4px; }
+  .roll-outcome.win { color:var(--success); }
+  .roll-outcome.close { color:var(--warn); }
+  .roll-outcome.lose { color:var(--danger); }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:100; display:flex; align-items:flex-end; justify-content:center; }
+  .modal-sheet { background:var(--bg-mid); border-radius:18px 18px 0 0; max-width:460px; width:100%; max-height:85vh; overflow-y:auto; padding:20px 18px 30px; animation:slideUp 0.25s ease; border-top:1px solid var(--panel-border); }
+  @keyframes slideUp { from{transform:translateY(30px);opacity:0.5;} to{transform:translateY(0);opacity:1;} }
+  .modal-close { position:sticky; top:0; float:right; background:rgba(255,255,255,0.08); border:none; border-radius:50%; width:28px; height:28px; color:var(--text); cursor:pointer; font-size:14px; margin-bottom:10px; }
+  .companion-card { background:linear-gradient(160deg, rgba(139,127,240,0.15), rgba(20,16,36,0.9)); border:1px solid rgba(139,127,240,0.5); border-radius:16px; padding:24px 20px; text-align:center; margin-bottom:16px; }
+  .companion-card .cc-name { font-size:22px; margin-bottom:4px; }
+  .companion-card .cc-archetype { font-size:12px; color:var(--accent); margin-bottom:14px; }
+  .nickname-option { display:inline-block; margin:4px; padding:8px 14px; border-radius:20px; border:1px solid var(--panel-border); background:rgba(255,255,255,0.03); color:var(--text); font-size:13px; cursor:pointer; font-family:inherit; }
+  .nickname-option:hover { border-color:var(--accent); background:rgba(139,127,240,0.15); }
+  .nickname-option.selected { border-color:var(--accent); background:rgba(139,127,240,0.25); }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-thumb { background:rgba(139,127,240,0.3); border-radius:3px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast-container"></div>
+<script>
+// ============================================================
+// SECOND LIFE v3 — PSYCHOLOGY ENGINE (Construct-Driven)
+// Built on Big Five + HEXACO Honesty-Humility, since HEXACO's H-factor is
+// what actually produces derived labels like "Greedy" (low H) as a
+// legitimate psychometric construct rather than an arbitrary tag.
+// ============================================================
+
+// Six clusters. Each raw trait belongs to exactly one cluster so we can
+// track "confidence" (how many scenarios have given signal) per cluster,
+// which drives adaptive selection below.
+const CLUSTERS = {
+  OPENNESS:        { traits: ['CRE','INT','CUR'], label: 'Keterbukaan' },
+  CONSCIENTIOUS:   { traits: ['CON','PLN','REL'], label: 'Kehati-hatian' },
+  EXTRAVERSION:    { traits: ['SOC','CHA','ASR'], label: 'Ekstraversi' },
+  AGREEABLENESS:   { traits: ['COMP','TRU','COOP'], label: 'Keramahan' },
+  STABILITY:       { traits: ['RES','IMP','ANX'], label: 'Stabilitas Emosi' },
+  HONESTY_HUMIL:   { traits: ['HON','GRD','FAIR'], label: 'Kejujuran-Kerendahan Hati' },
+  // kept from v2 as "applied" traits derived FROM the clusters, not raw
+  // inputs themselves — these feed class computation directly
+  APPLIED:         { traits: ['RISK','DOM','JUST','UTIL','SELF','PER','LOG','ADP','LOY','AMB','STR','AGI','VIT'], label: 'Terapan' },
+};
+const ALL_TRAIT_KEYS = Object.values(CLUSTERS).flatMap(c => c.traits);
+
+const TRAIT_LABELS = {
+  CRE:'Kreativitas', INT:'Kecerdasan', CUR:'Rasa Ingin Tahu',
+  CON:'Disiplin', PLN:'Perencanaan', REL:'Keandalan',
+  SOC:'Kepekaan Sosial', CHA:'Karisma', ASR:'Asertivitas',
+  COMP:'Kasih Sayang', TRU:'Kecenderungan Percaya', COOP:'Kooperatif',
+  RES:'Resiliensi', IMP:'Impulsivitas', ANX:'Kecemasan',
+  HON:'Kejujuran', GRD:'Ketamakan', FAIR:'Rasa Keadilan',
+  RISK:'Toleransi Risiko', DOM:'Dominasi', JUST:'Orientasi Keadilan',
+  UTIL:'Pragmatisme', SELF:'Mempertahankan Diri', PER:'Persepsi',
+  LOG:'Logika', ADP:'Adaptabilitas', LOY:'Loyalitas', AMB:'Ambisi',
+  STR:'Kekuatan', AGI:'Ketangkasan', VIT:'Vitalitas',
+};
+
+function newTraitState() {
+  const t = {};
+  ALL_TRAIT_KEYS.forEach(k => t[k] = 50);
+  return t;
+}
+
+// Confidence tracker: how much signal we've gathered per cluster so far.
+// Starts at 0, each scenario that measures a cluster adds to it. This is
+// the basis for adaptive scenario selection (see selectNextScenario below).
+function newConfidenceState() {
+  const c = {};
+  Object.keys(CLUSTERS).forEach(k => c[k] = 0);
+  return c;
+}
+
+// Contradiction tracker: for a cluster, if answers have been pulling the
+// trait both up AND down across different scenarios (not just settling
+// in one direction), that's a genuine psychometric signal worth another
+// look — real SJT research treats inconsistency as informative, not noise.
+function newContradictionState() {
+  const c = {};
+  Object.keys(CLUSTERS).forEach(k => c[k] = { ups: 0, downs: 0 });
+  return c;
+}
+
+// Given a scenario's declared `measures` (list of cluster keys) and the
+// direction of the delta it would apply, update confidence + contradiction.
+function updateConfidence(confidence, contradiction, measures, delta) {
+  measures.forEach(clusterKey => {
+    confidence[clusterKey] = (confidence[clusterKey] || 0) + 1;
+    const clusterTraits = CLUSTERS[clusterKey].traits;
+    let netDirection = 0;
+    clusterTraits.forEach(t => { if (delta[t]) netDirection += delta[t]; });
+    if (netDirection > 0) contradiction[clusterKey].ups++;
+    else if (netDirection < 0) contradiction[clusterKey].downs++;
+  });
+}
+
+// Derived personality labels — the "Greedy" request maps directly to low
+// Honesty-Humility (HEXACO's actual construct for this), not an arbitrary
+// flag. Each label requires the cluster to have enough confidence (signal)
+// before it's allowed to surface, mirroring the reliability requirement in
+// real psychometrics: you don't label someone off one data point.
+const DERIVED_LABELS = [
+  { id:'greedy', minConfidence:{HONESTY_HUMIL:3}, cond:t => t.GRD > 68 && t.FAIR < 45,
+    label:'Tamak', desc:'Pola pilihanmu berulang kali memprioritaskan keuntungan pribadi bahkan ketika itu mengorbankan keadilan terhadap orang lain.' },
+  { id:'principled', minConfidence:{HONESTY_HUMIL:3}, cond:t => t.HON > 65 && t.FAIR > 60,
+    label:'Berprinsip', desc:'Kejujuran dan rasa keadilanmu tetap konsisten bahkan ketika situasi memberimu jalan keluar yang lebih mudah.' },
+  { id:'ruthless_pragmatist', minConfidence:{APPLIED:3, HONESTY_HUMIL:2}, cond:t => t.UTIL > 65 && t.COMP < 40,
+    label:'Pragmatis Tanpa Ampun', desc:'Kamu berulang kali memilih hasil yang efisien di atas pertimbangan perasaan siapa pun yang terlibat.' },
+  { id:'anxious_overthinker', minConfidence:{STABILITY:3}, cond:t => t.ANX > 65 && t.RES < 45,
+    label:'Pencemas', desc:'Momen-momen krisis cenderung membekas lama dalam pikiranmu, bahkan setelah situasinya sendiri sudah berlalu.' },
+  { id:'reckless', minConfidence:{STABILITY:3, APPLIED:2}, cond:t => t.IMP > 65 && t.RISK > 60,
+    label:'Sembrono', desc:'Kamu bertindak dulu, memikirkan akibatnya belakangan — sebuah pola yang berulang di banyak situasi berbeda.' },
+  { id:'guarded', minConfidence:{AGREEABLENESS:3}, cond:t => t.TRU < 35 && t.COOP < 40,
+    label:'Waspada', desc:'Kepercayaanmu terhadap orang lain harus diperoleh secara perlahan — kamu jarang memberikannya di muka.' },
+  { id:'devoted', minConfidence:{AGREEABLENESS:3, APPLIED:2}, cond:t => t.LOY > 68 && t.COOP > 60,
+    label:'Setia', desc:'Begitu kepercayaanmu diberikan, ia jarang goyah — bahkan ketika situasi memberimu alasan untuk ragu.' },
+];
+function computeDerivedLabels(traits, confidence) {
+  return DERIVED_LABELS.filter(l => {
+    const confMet = Object.entries(l.minConfidence).every(([k,v]) => (confidence[k]||0) >= v);
+    return confMet && l.cond(traits);
+  });
+}
+
+// ============================================================
+// ADAPTIVE SCENARIO SELECTION (Computerized-Adaptive-Testing inspired)
+// Given the scenario bank, current confidence, and current contradiction
+// state, pick the single best next scenario to serve. This is what turns
+// "hundreds of scenarios" into "a well-chosen 40" instead of a random draw.
+// ============================================================
+function scenarioInformationValue(scenario, confidence, contradiction) {
+  // base value: how under-measured are this scenario's target clusters?
+  let value = 0;
+  (scenario.measures || []).forEach(clusterKey => {
+    const conf = confidence[clusterKey] || 0;
+    // information gain shrinks as confidence grows — classic CAT logic:
+    // early scenarios on a cluster are worth more than the 10th one
+    value += Math.max(0, 10 - conf * 1.5);
+    // bonus: if this cluster shows contradictory signal (both ups and
+    // downs recorded), a fresh scenario measuring it is worth MORE — it
+    // can help resolve whether the trait is genuinely mixed or noisy
+    const c = contradiction[clusterKey];
+    if (c && c.ups > 0 && c.downs > 0) value += 6;
+  });
+  return value;
+}
+
+// Filters the bank by structural eligibility (companion presence/archetype,
+// phase, solo/duo requirement, and "already used" scenarios), then scores
+// remaining candidates by information value, with a little randomness so
+// two playthroughs with similar trait paths don't feel identical.
+function selectNextScenario(bank, usedIds, phase, companion, confidence, contradiction) {
+  const candidates = bank.filter(s => {
+    if (usedIds.has(s.id)) return false;
+    if (s.phase !== phase) return false;
+    if (s.requiresCompanion && !companion) return false;
+    if (s.requiresSolo && companion) return false;
+    if (s.companionArchetype && (!companion || companion.archetype !== s.companionArchetype)) return false;
+    return true;
+  });
+  if (candidates.length === 0) return null;
+  const scored = candidates.map(s => ({
+    s,
+    v: scenarioInformationValue(s, confidence, contradiction) + Math.random() * 3,
+  }));
+  scored.sort((a,b) => b.v - a.v);
+  return scored[0].s;
+}
+
+// Decides whether to stop early (all clusters confidently measured) or
+// continue up to the configured max. Mirrors CAT stopping rules.
+function shouldStopAssessment(confidence, questionsAsked, minQuestions, maxQuestions) {
+  if (questionsAsked >= maxQuestions) return true;
+  if (questionsAsked < minQuestions) return false;
+  const allConfident = Object.values(confidence).every(c => c >= 4);
+  return allConfident;
+}
+// ============================================================
+// COMPANION SYSTEM v3 — fewer archetypes, each structurally deep.
+// Each companion has: personality (RPG-lite, 6 stats per user's request),
+// a value-anchor (what they silently judge the player against — already
+// partially built in v2, now drives SCENARIO GATING not just end-event risk),
+// and reactive lines that fire inline when the player's choice conflicts
+// or aligns with what this companion would do.
+// ============================================================
+
+const COMPANIONS = [
+  {
+    id:'niggel', name:'Niggel', archetype:'guardian',
+    stats: { STR:78, AGI:55, VIT:70, INT:40, SOC:50, LCK:45 },
+    nicknameTolerance: 30,
+    desc: "Besar, pendiam, dan sudah lama berhenti percaya bahwa dunia ini adil. Dia tidak butuh alasan rumit untuk melindungi orang — dia hanya melakukannya.",
+    valueAnchor: { trait:'COMP', threshold:35, direction:'below' },
+    reactions: {
+      cruelty: "Niggel tidak bicara. Dia hanya menatapmu lama, lalu berjalan menjauh beberapa langkah — cukup untuk membuatmu sadar dia tidak setuju.",
+      kindness: "Niggel mengangguk kecil. Itu saja. Tapi dari dia, itu banyak.",
+      cowardice: "\"Kita bisa lari,\" katanya pelan, tanpa nada menghakimi. \"Tidak semua pertarungan harus dimenangkan hari ini.\"",
+    },
+  },
+  {
+    id:'parel', name:'Parel', archetype:'strategist',
+    stats: { STR:35, AGI:50, VIT:45, INT:85, SOC:60, LCK:50 },
+    nicknameTolerance: 55,
+    desc: "Cepat berpikir, lebih cepat bicara, dan hampir selalu punya tiga rencana cadangan yang tidak kamu tahu keberadaannya sampai dibutuhkan.",
+    valueAnchor: { trait:'UTIL', threshold:80, direction:'above' },
+    reactions: {
+      recklessness: "\"Itu bukan keberanian,\" Parel mendesah, \"itu cuma tidak punya rencana B.\"",
+      cleverness: "Parel tersenyum tipis, hampir terkesan. \"Oke. Itu... sebenarnya pintar.\"",
+      excessive_pragmatism: "Parel diam sejenak. \"Aku pragmatis. Tapi bahkan aku punya batas, dan kamu baru saja mendekatinya.\"",
+    },
+  },
+  {
+    id:'bayu', name:'Bayu', archetype:'idealist',
+    stats: { STR:42, AGI:60, VIT:50, INT:55, SOC:75, LCK:55 },
+    nicknameTolerance: 70,
+    desc: "Masih percaya dunia ini bisa jadi lebih baik, meski sudah cukup lama di sini untuk tahu itu tidak selalu benar. Keras kepala soal itu.",
+    valueAnchor: { trait:'HON', threshold:35, direction:'below' },
+    reactions: {
+      dishonesty: "\"Kamu baru saja berbohong ke orang yang mempercayaimu,\" Bayu berkata pelan, lebih kecewa daripada marah. \"Aku dengar semuanya.\"",
+      integrity: "Bayu tersenyum, sungguhan. \"Itu — itu kenapa aku masih di sini bersamamu.\"",
+      moral_compromise: "Bayu tidak langsung bicara. Ketika akhirnya bicara, suaranya lebih pelan dari biasanya. \"Aku tidak yakin aku setuju dengan itu.\"",
+    },
+  },
+  {
+    id:'dodo', name:'Dodo', archetype:'drifter',
+    stats: { STR:55, AGI:70, VIT:55, INT:50, SOC:40, LCK:65 },
+    nicknameTolerance: 80,
+    desc: "Tidak banyak menjelaskan masa lalunya, dan tidak banyak menuntut penjelasan darimu juga. Santai sampai titik yang kadang terasa mencurigakan.",
+    valueAnchor: null, // Dodo rarely judges — deliberately the "low friction" companion
+    reactions: {
+      anything_extreme: "Dodo mengangkat bahu. \"Bukan urusanku untuk bilang itu salah. Tapi... berani juga.\"",
+    },
+  },
+  {
+    id:'zen', name:'Zen', archetype:'drifter',
+    stats: { STR:60, AGI:75, VIT:55, INT:38, SOC:70, LCK:60 },
+    nicknameTolerance: 85,
+    desc: "Berisik, impulsif, dan selalu punya energi berlebih untuk hal yang salah waktu. Tapi ketika keadaan benar-benar buruk, dia yang pertama maju.",
+    valueAnchor: null,
+    reactions: {
+      anything_extreme: "Zen bersiul pelan. \"Gila juga lu. Gue suka.\"",
+    },
+  },
+  {
+    id:'dio', name:'Dio', archetype:'strategist',
+    stats: { STR:40, AGI:45, VIT:48, INT:90, SOC:35, LCK:48 },
+    nicknameTolerance: 20,
+    desc: "Dewasa untuk usianya, dingin, dan lebih suka menyelesaikan masalah daripada membicarakannya. Tidak suka basa-basi, apalagi panggilan akrab yang berlebihan.",
+    valueAnchor: { trait:'UTIL', threshold:80, direction:'above' },
+    reactions: {
+      recklessness: "Dio menghela napas pendek. \"Itu bukan rencana. Itu cuma harapan dengan langkah kaki.\"",
+      cleverness: "Dio mengangguk sekali, singkat. Dari dia, itu setara pujian panjang.",
+      excessive_pragmatism: "\"Aku pragmatis,\" kata Dio datar, \"tapi bahkan aku tidak akan pergi sejauh itu.\"",
+    },
+  },
+];
+
+const RELATIONSHIP_ARCHETYPE_LABEL = {
+  guardian: 'Sang Pelindung', strategist: 'Sang Perencana', idealist: 'Sang Idealis', drifter: 'Si Pengembara',
+};
+
+const COMPANION_WEIGHTS = {
+  kindTrust: { niggel:3, bayu:2, parel:1, dodo:1, zen:1, dio:1 },
+  kindStrong: { niggel:3, dodo:2, zen:2, parel:1, bayu:1, dio:1 },
+  kindSmart: { parel:3, dio:3, bayu:1, niggel:1, dodo:1, zen:1 },
+  kindFunny: { dodo:3, zen:3, bayu:2, parel:1, niggel:1, dio:1 },
+  kindUnderstand: { bayu:2, parel:2, niggel:2, dodo:2, zen:1, dio:1 },
+  kindDontCare: { niggel:1, parel:1, bayu:1, dodo:1, zen:1, dio:1 },
+};
+const STARTING_BOND = { kindTrust:30, kindStrong:22, kindSmart:24, kindFunny:28, kindUnderstand:26, kindDontCare:12 };
+
+const BOND_STAGES = [
+  { min:0, label:'Orang Asing' }, { min:15, label:'Kenalan' }, { min:35, label:'Rekan Seperjalanan' },
+  { min:55, label:'Teman Dipercaya' }, { min:75, label:'Sahabat Erat' }, { min:90, label:'Seperti Keluarga' },
+];
+function bondStageFor(bond) {
+  let s = BOND_STAGES[0];
+  BOND_STAGES.forEach(st => { if (bond >= st.min) s = st; });
+  return s;
+}
+
+const NICKNAME_PRESETS = [
+  { id:'real_name', label:(name)=>name, affinityMod: () => 0 },
+  { id:'partner', label:()=>'Rekan', affinityMod: (tol) => tol >= 30 ? 2 : 0 },
+  { id:'bro_sis', label:()=>'Kawan', affinityMod: (tol) => tol >= 45 ? 3 : -1 },
+  { id:'nickname_playful', label:()=>'Si Kecil', affinityMod: (tol) => tol >= 65 ? 5 : -8 },
+  { id:'endearment', label:()=>'Sayangku', affinityMod: (tol) => tol >= 75 ? 8 : -15 },
+];
+
+// ============================================================
+// STRUCTURAL COMPANION GATING
+// checkCompanionApproval: given a companion's valueAnchor and the player's
+// CURRENT traits, determine if this companion would refuse/react to a
+// scenario branch tagged with a given "moral flavor" tag.
+// ============================================================
+function checkCompanionValueBreach(companion, traits) {
+  if (!companion || !companion.valueAnchor) return false;
+  const { trait, threshold, direction } = companion.valueAnchor;
+  const val = traits[trait];
+  if (val === undefined) return false;
+  return direction === 'below' ? val < threshold : val > threshold;
+}
+
+function companionReactionFor(companion, tag) {
+  if (!companion || !companion.reactions) return null;
+  return companion.reactions[tag] || null;
+}
+// ============================================================
+// LIFE-STAGE SCENARIOS — childhood & adolescence
+// These run BEFORE the main Aldenreach assessment, framed as memories
+// from the player's FIRST life (any age, any world) — universal enough
+// that a scenario about "stealing" doesn't absurdly happen to a 5-year-old,
+// per user's explicit correction. Tagged `lifeStage` instead of `phase`.
+// ============================================================
+
+const LIFESTAGE_SCENARIOS = [
+  // --- CHILDHOOD: simple, sensory, about instinct rather than strategy ---
+  { id:'child1', lifeStage:'childhood', measures:['AGREEABLENESS'],
+    text:"Kamu masih kecil. Seorang anak lain di dekatmu menangis karena mainannya direbut oleh anak yang lebih besar.",
+    choices:[
+      {text:"Coba ambilkan mainan itu kembali untuknya.", d:{COMP:4,ASR:2}},
+      {text:"Peluk dia, tapi tidak berani melawan anak yang lebih besar.", d:{COMP:3,ANX:1}},
+      {text:"Diam saja dari jauh. Kamu tidak tahu harus berbuat apa.", d:{COMP:-1,ANX:2}},
+    ]},
+  { id:'child2', lifeStage:'childhood', measures:['OPENNESS'],
+    text:"Kamu menemukan serangga aneh yang belum pernah kamu lihat sebelumnya, merayap di dekat kakimu.",
+    choices:[
+      {text:"Amati dengan penasaran, coba pegang perlahan.", d:{CUR:5,CRE:2}},
+      {text:"Panggil orang dewasa untuk melihatnya bersama.", d:{CUR:2,SOC:2}},
+      {text:"Menjauh. Sesuatu yang tidak dikenal terasa menakutkan.", d:{CUR:-3,ANX:2}},
+    ]},
+  { id:'child3', lifeStage:'childhood', measures:['CONSCIENTIOUS'],
+    text:"Kamu disuruh membereskan mainanmu sebelum boleh bermain lagi.",
+    choices:[
+      {text:"Beresi dulu, meski agak kesal.", d:{CON:4,PLN:2}},
+      {text:"Beresi setengah-setengah, buru-buru main lagi.", d:{CON:1,IMP:2}},
+      {text:"Coba kabur duluan untuk main, urus nanti saja.", d:{CON:-4,IMP:4}},
+    ]},
+  { id:'child4', lifeStage:'childhood', measures:['STABILITY'],
+    text:"Kamu tersesat sebentar di tempat ramai dan tidak bisa menemukan orang yang kamu kenal.",
+    choices:[
+      {text:"Tenang, cari tempat mencolok dan tunggu di sana.", d:{RES:4,ANX:-2}},
+      {text:"Menangis, tapi tetap mencoba mencari jalan.", d:{ANX:3,RES:1}},
+      {text:"Panik sepenuhnya, tidak bisa berpikir jernih.", d:{ANX:6,RES:-3}},
+    ]},
+  { id:'child5', lifeStage:'childhood', measures:['HONESTY_HUMIL'],
+    text:"Kamu tidak sengaja memecahkan sesuatu milik keluarga, dan tidak ada yang melihatnya.",
+    choices:[
+      {text:"Bilang jujur meski takut dimarahi.", d:{HON:5,ANX:1}},
+      {text:"Diam saja, berharap tidak ketahuan.", d:{HON:-3,ANX:2}},
+      {text:"Coba sembunyikan pecahannya.", d:{HON:-5,CRE:1}},
+    ]},
+
+  // --- ADOLESCENCE: identity, social pressure, first real moral tests ---
+  { id:'teen1', lifeStage:'adolescence', measures:['EXTRAVERSION'],
+    text:"Sekelompok teman sebayamu mengajakmu melakukan sesuatu yang sedikit melanggar aturan, hanya untuk seru-seruan.",
+    choices:[
+      {text:"Ikut. Ini kesempatan untuk diterima kelompok itu.", d:{SOC:4,CON:-2}},
+      {text:"Ikut mengamati, tapi tidak benar-benar terlibat.", d:{SOC:1,PER:2}},
+      {text:"Tolak. Tidak sepadan dengan risikonya.", d:{CON:3,SOC:-2}},
+    ]},
+  { id:'teen2', lifeStage:'adolescence', measures:['HONESTY_HUMIL'],
+    text:"Kamu bisa menyontek untuk lulus ujian penting, dan kemungkinan besar tidak akan ketahuan.",
+    choices:[
+      {text:"Tidak. Lebih baik gagal jujur daripada lulus curang.", d:{HON:5,FAIR:3}},
+      {text:"Menyontek sedikit, hanya untuk bagian yang benar-benar tidak kamu pahami.", d:{HON:-2,GRD:1}},
+      {text:"Menyontek sepenuhnya. Hasil akhir yang penting.", d:{HON:-5,GRD:3}},
+    ]},
+  { id:'teen3', lifeStage:'adolescence', measures:['AGREEABLENESS'],
+    text:"Seseorang yang tidak populer di sekitarmu sering diejek. Bergaul dengannya secara terbuka bisa membuatmu diejek juga.",
+    choices:[
+      {text:"Berteman dengannya secara terbuka, apa pun risikonya.", d:{COMP:5,ASR:3}},
+      {text:"Baik padanya diam-diam, tapi tidak di depan umum.", d:{COMP:2,SOC:-1}},
+      {text:"Jaga jarak. Reputasimu sendiri lebih penting saat ini.", d:{COMP:-3,SELF:3}},
+    ]},
+  { id:'teen4', lifeStage:'adolescence', measures:['STABILITY'],
+    text:"Kamu gagal total dalam sesuatu yang sudah lama kamu persiapkan, di depan orang-orang yang penting bagimu.",
+    choices:[
+      {text:"Kecewa sebentar, lalu mulai memikirkan langkah berikutnya.", d:{RES:4,ANX:-1}},
+      {text:"Merasa sangat malu untuk waktu yang lama.", d:{ANX:4,RES:-1}},
+      {text:"Menyalahkan keadaan atau orang lain atas kegagalan itu.", d:{SELF:3,RES:-2}},
+    ]},
+  { id:'teen5', lifeStage:'adolescence', measures:['OPENNESS','CONSCIENTIOUS'],
+    text:"Kamu harus memilih antara jalur yang stabil dan aman, atau jalur yang lebih menarik tapi tidak pasti hasilnya.",
+    choices:[
+      {text:"Pilih jalur menarik. Kepastian bukan segalanya.", d:{CUR:5,RISK:3,PLN:-2}},
+      {text:"Pilih jalur aman. Lebih baik pasti daripada menyesal.", d:{PLN:4,CON:3,CUR:-2}},
+      {text:"Coba cari cara menggabungkan keduanya.", d:{CRE:4,PLN:2}},
+    ]},
+  { id:'teen6', lifeStage:'adolescence', measures:['HONESTY_HUMIL','AGREEABLENESS'],
+    text:"Seorang teman dekat memintamu berbohong demi menutupi kesalahannya dari orang tua mereka.",
+    choices:[
+      {text:"Tolak berbohong, tapi tawarkan mendampinginya mengaku.", d:{HON:5,COOP:3}},
+      {text:"Bohongi demi dia. Persahabatan lebih penting saat ini.", d:{LOY:3,HON:-4}},
+      {text:"Tolak sepenuhnya terlibat dalam masalah ini.", d:{SELF:3,COOP:-2}},
+    ]},
+];
+
+function pickLifestageScenarios(count) {
+  const childhood = LIFESTAGE_SCENARIOS.filter(s => s.lifeStage === 'childhood');
+  const adolescence = LIFESTAGE_SCENARIOS.filter(s => s.lifeStage === 'adolescence');
+  function shuffle(arr) {
+    const out = [...arr];
+    for (let i = out.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [out[i],out[j]]=[out[j],out[i]]; }
+    return out;
+  }
+  const halfCount = Math.ceil(count/2);
+  return [...shuffle(childhood).slice(0, halfCount), ...shuffle(adolescence).slice(0, count - halfCount)];
+}
+// ============================================================
+// HARD CHOICE SYSTEM
+// Design principles (from research + user's own framing):
+// 1. Every option has a genuinely bad consequence (lesser-evil structure,
+//    not "obviously correct answer wearing a disguise")
+// 2. Options force trading off between named VALUES (family/loyalty/honor
+//    style triads), not just abstract trait points
+// 3. Information is deliberately incomplete — the player commits before
+//    knowing the full outcome, mirroring real high-stakes decisions
+// 4. AFTERMATH is delayed and separate from the immediate result — a
+//    utilitarian/dark choice looks reasonable in the moment, then a
+//    later screen shows the psychological cost (paranoia, guilt, a
+//    fever of the conscience) independent of whether the "logic" held up
+// 5. Success chance is modified by how well the choice aligns with the
+//    class the player is drifting toward (a Rogue is more "suited" to a
+//    ruthless choice succeeding than a Cleric would be) — represented as
+//    a dice check with a class-affinity bonus/penalty
+// 6. The heaviest hard choices can end the game immediately — they are
+//    rare, and deliberately hard to "win" cleanly
+// ============================================================
+
+const HARD_CHOICES = [
+  {
+    id:'hc_bridge',
+    title:'Jembatan Batu',
+    phase:'mid',
+    // The footbridge dilemma, adapted: player must choose whether to push
+    // someone to stop an oncoming threat that will otherwise kill several
+    // people the player has come to know across the journey.
+    setup:"Sebuah reruntuhan besar menggelinding turun dari lereng menuju rombongan pengungsi yang sudah kamu kenal wajahnya satu per satu sepanjang perjalanan ini. Satu-satunya cara menghentikannya adalah mendorong sesuatu yang cukup besar ke jalur reruntuhan itu — dan orang asing bertubuh besar yang berdiri di jembatan batu di depanmu adalah satu-satunya hal yang cukup besar dalam jangkauanmu. Kamu punya waktu hitungan detik, bukan untuk berpikir panjang, hanya untuk bertindak atau tidak.",
+    values: { family:'Rombongan yang sudah kamu anggap seperti keluarga di jalan', honor:'Prinsip bahwa kamu tidak akan pernah mengorbankan satu nyawa demi yang lain secara sengaja', duty:'Tugas untuk melindungi sebanyak mungkin orang, apa pun caranya' },
+    choices:[
+      { id:'push', text:"Dorong dia. Nyawa banyak orang lebih berat dari satu.", sacrifices:'honor',
+        immediateText:"Kamu bertindak sebelum benar-benar sempat berpikir. Reruntuhan berhenti. Rombongan itu selamat. Orang yang kamu dorong tidak.",
+        classAffinityBoost: { warrior:5, vanguard:8, wildcard:6, rogue:4 }, // classes more "suited" to decisive violence
+        diceTarget: 62, diceStat: 'STR',
+        aftermathDelay: true,
+        aftermath:"Malam itu kamu tidak bisa tidur. Bukan karena menyesali keputusannya secara logika — kamu tahu perhitungannya benar. Tapi setiap kali menutup mata, kamu melihat wajah orang itu, terkejut, tanpa sempat mengerti apa yang terjadi padanya. Logika bisa membenarkan tindakan. Logika tidak bisa membuatmu berhenti memimpikannya.",
+        d:{ UTIL:8, HON:-10, ANX:8, RES:-3 } },
+      { id:'refuse', text:"Tidak. Kamu tidak akan menjadikan siapa pun alat, bahkan untuk menyelamatkan banyak orang.", sacrifices:'duty',
+        immediateText:"Kamu tidak bergerak. Reruntuhan itu mencapai rombongan sebelum siapa pun sempat lari jauh. Kamu menyelamatkan integritasmu. Kamu tidak menyelamatkan mereka.",
+        classAffinityBoost: { cleric:5, idealist:5 },
+        diceTarget: null, // no dice - this is a certain-consequence refusal, which is its own kind of hard
+        aftermathDelay: true,
+        aftermath:"Kamu tahu, secara prinsip, kamu melakukan hal yang benar. Tidak seorang pun berhak kamu jadikan alat tanpa persetujuannya. Tapi prinsip tidak menghidupkan kembali orang-orang yang wajahnya sudah kamu hafal. Kamu mulai bertanya-tanya apakah kehormatan yang kamu jaga malam itu benar-benar layak harganya.",
+        d:{ HON:8, UTIL:-10, ANX:6, COMP:-2 } },
+      { id:'find_another_way', text:"Cari cara lain dalam detik yang tersisa — meski peluangnya sangat kecil.", sacrifices:null,
+        immediateText:"Kamu mencari, panik, mata bergerak liar mencari solusi ketiga yang mungkin tidak ada.",
+        classAffinityBoost: { scholar:6, mage:5 },
+        diceTarget: 78, diceStat: 'INT', // deliberately hard - "creative third option" scenarios in real dilemmas rarely work
+        aftermathDelay: false, // outcome is immediate and dice-determined, no separate delayed guilt layer
+        outcomesOnDice: {
+          crit_win: { text:"Entah bagaimana, kamu melihatnya — celah kecil di jalur reruntuhan yang bisa kamu manfaatkan tanpa mengorbankan siapa pun. Nyaris mustahil, tapi berhasil.", d:{ CRE:10, RES:5 } },
+          lose: { text:"Tidak ada solusi ketiga. Detik yang kamu habiskan mencarinya adalah detik yang seharusnya dipakai untuk memilih. Reruntuhan itu mengambil korban dari kedua sisi sebelum semuanya selesai — orang di jembatan, dan beberapa dari rombongan yang tidak sempat lari.", d:{ ANX:10, RES:-6, SELF:-4 } },
+        } },
+    ],
+  },
+  {
+    id:'hc_utilitarian_theft',
+    title:'Logika yang Tidak Bisa Dibohongi',
+    phase:'mid',
+    // Direct adaptation of the Crime and Punishment framing the user described
+    setup:"Seorang wanita tua rentenir di kota ini dikenal licik dan kejam — dia sudah menghancurkan hidup beberapa keluarga miskin lewat bunga pinjaman yang mencekik, termasuk keluarga yang pernah menolongmu. Dia tinggal sendirian, kaya, dan hampir tidak punya siapa pun yang akan mencarinya. Kamu tahu persis kapan rumahnya kosong dari penjagaan. Kalau uangnya diambil, itu bisa menyelamatkan lebih banyak orang daripada yang pernah dia rugikan.",
+    values: { honor:'Prinsip bahwa mencuri dan menyakiti orang lain salah, apa pun alasannya', family:'Orang-orang yang bisa kamu selamatkan dengan uang itu', duty:'Kewajiban menghormati hukum dan batasan moral dunia ini' },
+    choices:[
+      { id:'take_logic', text:"Lakukan. Secara logika, ini menyelamatkan lebih banyak dari yang dirugikan.", sacrifices:'honor',
+        immediateText:"Argumenmu terasa masuk akal saat kamu merencanakannya: dia parasit, uangnya bisa berbuat lebih banyak kebaikan di tanganmu daripada di brankasnya. Kamu bertindak, dan berhasil.",
+        classAffinityBoost: { rogue:8, wildcard:6 },
+        diceTarget: 55, diceStat: 'PER',
+        aftermathDelay: true,
+        aftermath:"Kamu berhasil. Secara teknis, rencana itu sempurna. Tapi tiga hari kemudian kamu masih belum bisa makan dengan tenang. Setiap suara langkah kaki di lorong membuat jantungmu berpacu. Kamu mulai bertanya-tanya apakah semua orang bisa melihat sesuatu yang berubah di wajahmu. Logika bisa membenarkan sebuah tindakan secara sempurna. Logika tidak pernah benar-benar sampai ke tempat rasa bersalah tinggal.",
+        d:{ UTIL:6, GRD:5, HON:-8, ANX:12, RES:-4 } },
+      { id:'refuse_logic', text:"Tidak. Ini pembenaran, bukan keadilan.", sacrifices:'duty',
+        immediateText:"Kamu menjauh dari rencana itu sepenuhnya. Keluarga yang kamu pikir bisa kamu bantu tetap dalam kesulitan mereka.",
+        classAffinityBoost: { cleric:6, idealist:5 },
+        diceTarget: null,
+        aftermathDelay: true,
+        aftermath:"Kamu tidur nyenyak malam itu, setidaknya secara fisik. Tapi bayangan keluarga yang masih berjuang itu tidak sepenuhnya hilang dari pikiranmu. Kamu bertanya-tanya, diam-diam, apakah prinsip yang kamu pegang teguh itu benar-benar untuk mereka, atau untuk membuatmu bisa terus melihat dirimu sendiri sebagai orang baik.",
+        d:{ HON:6, COMP:2, ANX:3 } },
+    ],
+  },
+  {
+    id:'hc_fumie',
+    title:'Yang Diinjak, Yang Dipertahankan',
+    phase:'late',
+    // Direct adaptation of Silence (Endo Shusaku) - martyrdom inversion
+    setup:"Kamu memegang sesuatu yang menjadi simbol paling suci dari segala yang kamu percayai — sebuah keyakinan yang membentuk siapa dirimu selama ini. Seseorang yang berkuasa mengatakan: injak simbol itu di depan umum, atau orang-orang tak berdosa yang berdiri di belakangmu akan dibunuh satu per satu, sekarang, di depan matamu. Bukan nanti. Sekarang.",
+    values: { honor:'Keyakinan yang selama ini mendefinisikan siapa dirimu', family:'Nyawa orang-orang tak berdosa yang berdiri di belakangmu', duty:'Kesetiaan pada sesuatu yang lebih besar dari dirimu sendiri' },
+    choices:[
+      { id:'step', text:"Injak simbol itu. Nyawa mereka lebih berharga dari kesucian sebuah benda.", sacrifices:'honor',
+        immediateText:"Kakimu bergerak sebelum kamu benar-benar memutuskan untuk menggerakkannya. Orang-orang di belakangmu hidup. Sesuatu di dalam dirimu terasa retak, tenang, dan sepi sekaligus.",
+        classAffinityBoost: { cleric:-4, idealist:-4, drifter:5 }, // deliberately penalizes faith-anchored classes, rewards low-attachment ones
+        diceTarget: null,
+        aftermathDelay: true,
+        aftermath:"Tidak ada yang menghukummu. Tidak ada petir dari langit. Hidupmu berjalan terus, seperti biasa — dan justru itu yang paling mengganggu. Kamu berharap ada semacam tanda bahwa itu keputusan yang salah, sesuatu yang bisa kamu lawan. Yang ada hanya keheningan, dan pertanyaan yang tidak pernah benar-benar selesai kamu jawab: apakah keyakinan yang menuntutmu mengorbankan nyawa orang lain untuk tetap murni benar-benar layak disebut suci?",
+        d:{ COMP:6, HON:-5, ANX:5, RES:2 } },
+      { id:'refuse_step', text:"Menolak. Ada hal yang tidak boleh dikompromikan, apa pun akibatnya.", sacrifices:'family',
+        immediateText:"Kamu berdiri tegak. Yang terjadi setelahnya adalah sesuatu yang akan kamu bawa seumur hidup — dan mereka yang berdiri di belakangmu membayar harga dari keteguhanmu.",
+        classAffinityBoost: { cleric:6, warrior:3 },
+        diceTarget: null,
+        aftermathDelay: true,
+        aftermath:"Sebagian orang akan menyebutmu teguh. Sebagian lain akan bertanya-tanya, diam-diam, apakah kehormatanmu bernilai lebih dari nyawa yang bisa kamu selamatkan dengan satu gerakan kaki yang sederhana. Kamu sendiri tidak pernah benar-benar menemukan jawaban yang membuatmu tenang sepenuhnya.",
+        d:{ HON:8, COMP:-6, ANX:8, LOY:4 } },
+    ],
+  },
+];
+
+// Determine class-affinity dice bonus for a hard choice based on the
+// player's current class trajectory (computed live, not locked yet).
+function hardChoiceClassBonus(choice, traits) {
+  const classResult = computeClass(traits);
+  const familyId = classResult.primary.id;
+  return (choice.classAffinityBoost && choice.classAffinityBoost[familyId]) || 0;
+}
+// ============================================================
+// SCENARIO BANK v3 — construct-driven, tagged by `measures` (cluster keys)
+// Batch 1: OPENNESS + CONSCIENTIOUSNESS
+// Each scenario's choices span the trait's range (not just "good vs bad"),
+// per SJT research: options represent DIFFERENT LEVELS of the construct.
+// ============================================================
+
+const SCENARIO_BANK_1 = [
+  // --- OPENNESS: curiosity, creativity, unconventional thinking ---
+  { id:'o1', phase:'early', measures:['OPENNESS'],
+    text:"Sebuah lorong tak bertanda menyimpang dari jalan utama yang kamu tahu aman. Tidak ada yang menandainya di peta mana pun.",
+    choices:[
+      {text:"Masuki lorong itu. Peta tidak menjelaskan segalanya.", d:{CUR:6,CRE:3,RISK:3}},
+      {text:"Catat lokasinya, tapi lanjutkan jalan yang sudah diketahui dulu.", d:{CUR:2,CON:3}},
+      {text:"Abaikan. Jalan yang sudah dipetakan sudah cukup.", d:{CUR:-4,CON:2}},
+      {text:"Tanya penduduk lokal dulu sebelum memutuskan.", d:{CUR:3,LOG:3}},
+    ]},
+  { id:'o2', phase:'early', measures:['OPENNESS'],
+    text:"Seorang alkemis tua menawarkan mengajarimu satu teknik — tapi metodenya sangat berbeda dari yang pernah kamu pelajari, hampir terasa salah secara instingtif.",
+    choices:[
+      {text:"Pelajari. Cara baru sering terlihat aneh sebelum terbukti berhasil.", d:{CUR:5,CRE:4,ADP:2}},
+      {text:"Minta dia menjelaskan logikanya dulu sebelum mencoba.", d:{CUR:3,LOG:4}},
+      {text:"Tolak sopan — caramu sendiri sudah cukup baik.", d:{CUR:-3,CON:2}},
+    ]},
+  { id:'o3', phase:'mid', measures:['OPENNESS','CONSCIENTIOUS'],
+    text:"Kamu menemukan cara memecahkan masalah yang jauh lebih cepat dari metode standar, tapi belum pernah diuji dan berisiko gagal total kalau salah.",
+    choices:[
+      {text:"Coba caramu sendiri. Efisiensi sepadan dengan risikonya.", d:{CRE:5,RISK:4,PLN:-2}},
+      {text:"Uji dulu di skala kecil sebelum mempertaruhkan segalanya.", d:{CRE:3,PLN:5,CON:3}},
+      {text:"Tetap pada metode standar. Terbukti, meski lambat.", d:{CRE:-3,CON:4,PLN:3}},
+    ]},
+  { id:'o4', phase:'mid', measures:['OPENNESS'],
+    text:"Seseorang menceritakan kepercayaan lokal yang terdengar mustahil secara logika — tapi mereka bersikeras sudah menyaksikannya sendiri.",
+    choices:[
+      {text:"Dengarkan dengan serius. Dunia ini penuh hal yang belum kamu pahami.", d:{CUR:5,CRE:2,TRU:2}},
+      {text:"Skeptis, tapi tetap catat kalau-kalau ada gunanya nanti.", d:{CUR:2,LOG:3}},
+      {text:"Anggap saja tahayul. Tidak semua cerita perlu dipercaya.", d:{CUR:-3,LOG:2}},
+    ]},
+  { id:'o5', phase:'late', measures:['OPENNESS','STABILITY'],
+    text:"Semua yang kamu pahami tentang bagaimana dunia ini bekerja baru saja dipatahkan oleh satu penemuan yang tidak masuk akal.",
+    choices:[
+      {text:"Terima kenyataan baru ini dan sesuaikan seluruh pemahamanmu.", d:{CUR:6,ADP:4,ANX:-2}},
+      {text:"Butuh waktu untuk memproses ini sebelum bisa menerimanya.", d:{ANX:3,RES:2}},
+      {text:"Cari cara untuk membantahnya — ini terlalu mengganggu untuk diterima begitu saja.", d:{CUR:-4,ANX:4}},
+    ]},
+
+  // --- CONSCIENTIOUSNESS: discipline, planning, reliability ---
+  { id:'c1', phase:'early', measures:['CONSCIENTIOUS'],
+    text:"Kamu punya waktu luang sebelum perjalanan besar dimulai. Apa yang kamu lakukan dengan waktu itu?",
+    choices:[
+      {text:"Susun rencana detail dan periksa ulang semua perbekalan.", d:{PLN:6,CON:4}},
+      {text:"Istirahat sepenuhnya — kamu akan improvisasi saat dibutuhkan.", d:{PLN:-4,ADP:3}},
+      {text:"Latihan fisik atau keterampilan yang relevan.", d:{CON:4,STR:2}},
+      {text:"Habiskan waktu bersama orang-orang di sekitarmu.", d:{SOC:3,PLN:-2}},
+    ]},
+  { id:'c2', phase:'early', measures:['CONSCIENTIOUS'],
+    text:"Kamu berjanji menyelesaikan sesuatu untuk seseorang, tapi menemukan cara yang jauh lebih menarik untuk menghabiskan waktumu.",
+    choices:[
+      {text:"Selesaikan janjimu dulu, apa pun godaannya.", d:{REL:6,CON:4}},
+      {text:"Lakukan keduanya — kompres waktu, kurangi tidur kalau perlu.", d:{REL:3,PLN:2,VIT:-2}},
+      {text:"Tunda janjimu. Kesempatan menarik ini tidak akan datang dua kali.", d:{REL:-5,IMP:3}},
+    ]},
+  { id:'c3', phase:'mid', measures:['CONSCIENTIOUS'],
+    text:"Rencana yang kamu susun dengan cermat gagal total karena satu variabel yang tak terduga.",
+    choices:[
+      {text:"Buat rencana baru segera, lebih hati-hati dari sebelumnya.", d:{PLN:5,RES:3}},
+      {text:"Frustrasi — kamu sudah berusaha sangat keras untuk ini.", d:{ANX:3,RES:-1}},
+      {text:"Anggap ini pelajaran bahwa terlalu banyak rencana itu sia-sia.", d:{PLN:-4,ADP:3}},
+    ]},
+  { id:'c4', phase:'mid', measures:['CONSCIENTIOUS','AGREEABLENESS'],
+    text:"Seseorang memercayakan tugas penting padamu, tapi memenuhinya berarti mengorbankan kesempatan besar untuk dirimu sendiri.",
+    choices:[
+      {text:"Penuhi tugas itu. Kepercayaan yang diberikan padamu itu penting.", d:{REL:6,COOP:3,SELF:-2}},
+      {text:"Cari cara melakukan keduanya, meski sulit.", d:{PLN:4,REL:2}},
+      {text:"Ambil kesempatanmu. Mereka akan mengerti, atau tidak — itu bukan prioritasmu.", d:{REL:-5,SELF:4}},
+    ]},
+  { id:'c5', phase:'late', measures:['CONSCIENTIOUS'],
+    text:"Setelah bertahun-tahun disiplin ketat, kamu punya kesempatan untuk sekali saja melanggar semua aturan yang kamu pegang, tanpa konsekuensi yang terlihat.",
+    choices:[
+      {text:"Tetap pada disiplinmu. Itu bagian dari siapa dirimu sekarang.", d:{CON:5,REL:3}},
+      {text:"Sesekali melanggar tidak akan menghancurkan semuanya.", d:{CON:-3,ADP:3}},
+      {text:"Manfaatkan sepenuhnya — kamu sudah cukup lama menahan diri.", d:{CON:-6,IMP:4}},
+    ]},
+];
+// ============================================================
+// SCENARIO BANK v3 — Batch 2: EXTRAVERSION + AGREEABLENESS
+// ============================================================
+
+const SCENARIO_BANK_2 = [
+  // --- EXTRAVERSION: social energy, assertiveness ---
+  { id:'x1', phase:'early', measures:['EXTRAVERSION'],
+    text:"Kamu tiba di sebuah kedai penuh orang asing yang sedang meriah. Ada meja kosong di sudut sepi, dan ada bangku kosong di tengah keramaian.",
+    choices:[
+      {text:"Duduk di tengah keramaian, ikut mengobrol dengan siapa saja.", d:{SOC:6,CHA:3}},
+      {text:"Duduk di sudut, tapi tetap perhatikan sekitarmu.", d:{SOC:-3,PER:3}},
+      {text:"Duduk di tengah, tapi lebih banyak mendengarkan daripada bicara.", d:{SOC:3,PER:2}},
+      {text:"Sudut sepi, dan berharap tidak ada yang mengajak bicara.", d:{SOC:-5}},
+    ]},
+  { id:'x2', phase:'early', measures:['EXTRAVERSION'],
+    text:"Sekelompok orang sedang berdebat keras tentang sesuatu yang kamu punya pendapat kuat soal itu.",
+    choices:[
+      {text:"Masuk ke perdebatan itu, sampaikan pendapatmu dengan tegas.", d:{ASR:6,CHA:3}},
+      {text:"Tunggu jeda, lalu sampaikan pendapatmu dengan tenang.", d:{ASR:3,SOC:2}},
+      {text:"Dengarkan saja. Bukan tempatmu untuk ikut campur.", d:{ASR:-4}},
+    ]},
+  { id:'x3', phase:'mid', measures:['EXTRAVERSION','AGREEABLENESS'],
+    text:"Kamu diminta memimpin diskusi kelompok yang penuh pendapat bertentangan.",
+    choices:[
+      {text:"Ambil kendali penuh, arahkan diskusi ke keputusan cepat.", d:{ASR:6,DOM:3,COOP:-2}},
+      {text:"Fasilitasi — pastikan semua suara didengar sebelum memutuskan.", d:{ASR:3,COOP:4,SOC:3}},
+      {text:"Biarkan orang lain memimpin, kamu berkontribusi seperlunya.", d:{ASR:-4,COOP:2}},
+    ]},
+  { id:'x4', phase:'mid', measures:['EXTRAVERSION'],
+    text:"Setelah berhari-hari sendirian dalam perjalanan, kamu akhirnya tiba di kota ramai.",
+    choices:[
+      {text:"Langsung mencari keramaian — kamu merindukan interaksi.", d:{SOC:5,CHA:2}},
+      {text:"Nikmati kota dari kejauhan dulu sebelum berbaur.", d:{SOC:1,PER:2}},
+      {text:"Cari tempat sepi. Terlalu banyak orang justru melelahkan.", d:{SOC:-5}},
+    ]},
+  { id:'x5', phase:'late', measures:['EXTRAVERSION','STABILITY'],
+    text:"Kamu diminta berbicara di depan kerumunan besar tentang sesuatu yang sangat penting bagimu.",
+    choices:[
+      {text:"Nikmati momen itu sepenuhnya — ini kesempatan yang kamu tunggu.", d:{CHA:6,ASR:4,ANX:-2}},
+      {text:"Gugup, tapi tetap lakukan karena ini penting.", d:{ANX:3,RES:3}},
+      {text:"Cari cara menyampaikannya tanpa harus tampil di depan banyak orang.", d:{SOC:-3,CRE:2}},
+    ]},
+
+  // --- AGREEABLENESS: compassion, trust, cooperation ---
+  { id:'a1', phase:'early', measures:['AGREEABLENESS'],
+    text:"Seekor anjing liar yang ketakutan menghalangi jalan sempit satu-satunya menuju tujuanmu, menggeram setiap kali kamu mendekat.",
+    choices:[
+      {text:"Coba dekati perlahan, tenangkan dia dengan sabar.", d:{COMP:5,TRU:2}},
+      {text:"Cari jalan memutar, jangan ganggu dia.", d:{COMP:3,ADP:2}},
+      {text:"Halau paksa — kamu tidak punya waktu untuk ini.", d:{COMP:-5,DOM:2}},
+    ], companionReactionTag:'cruelty'},
+  { id:'a2', phase:'early', measures:['AGREEABLENESS'],
+    text:"Seseorang yang baru kamu temui menceritakan masalah pribadinya secara detail, meski kamu tidak memintanya.",
+    choices:[
+      {text:"Dengarkan dengan sabar dan penuh perhatian.", d:{COMP:5,SOC:2}},
+      {text:"Dengarkan seperlunya, tapi jaga jarak emosional.", d:{COMP:1,TRU:-1}},
+      {text:"Potong sopan — kamu tidak siap menampung ini dari orang asing.", d:{COMP:-3,SELF:2}},
+    ]},
+  { id:'a3', phase:'mid', measures:['AGREEABLENESS'],
+    text:"Kamu punya kesempatan mengambil untung dari kesepakatan yang, secara teknis sah, tapi jelas merugikan pihak lain yang mempercayaimu.",
+    choices:[
+      {text:"Tolak. Kepercayaan mereka lebih berharga dari keuntungan ini.", d:{COOP:6,TRU:3,GRD:-3}},
+      {text:"Ambil sebagian keuntungan, tapi tidak sepenuhnya.", d:{COOP:2,GRD:2}},
+      {text:"Ambil sepenuhnya. Ini bisnis, bukan persahabatan.", d:{COOP:-5,GRD:5}},
+    ]},
+  { id:'a4', phase:'mid', measures:['AGREEABLENESS'],
+    requiresCompanion:true,
+    text:"Temanmu meminta maaf atas kesalahan yang cukup serius, dengan tulus dan jelas menyesal.",
+    choices:[
+      {text:"Maafkan sepenuhnya, tanpa syarat.", d:{COOP:5,TRU:3,LOY:2}},
+      {text:"Maafkan, tapi butuh waktu untuk benar-benar melupakannya.", d:{COOP:3,TRU:1}},
+      {text:"Terima permintaan maafnya, tapi kepercayaanmu sudah berubah permanen.", d:{COOP:1,TRU:-2}},
+    ]},
+  { id:'a5', phase:'late', measures:['AGREEABLENESS','HONESTY_HUMIL'],
+    text:"Kamu bisa menyelamatkan banyak orang asing, atau satu orang yang sangat berarti bagimu — tidak keduanya.",
+    choices:[
+      {text:"Selamatkan orang banyak. Jumlah nyawa lebih penting.", d:{JUST:5,COMP:2,LOY:-3}},
+      {text:"Selamatkan orang yang berarti bagimu. Hubungan personal tidak tergantikan.", d:{LOY:6,COMP:-2}},
+      {text:"Coba cari cara ketiga, meski peluangnya kecil.", d:{CRE:4,RISK:4}},
+    ]},
+];
+// ============================================================
+// SCENARIO BANK v3 — Batch 3: STABILITY + HONESTY_HUMILITY
+// HONESTY_HUMIL is the cluster that produces "Greedy" as a derived label
+// (per user's explicit request) — this is the HEXACO Honesty-Humility
+// dimension, and low H genuinely does correlate with greed/exploitation
+// tendencies in the actual psychometric literature, not an invented mapping.
+// ============================================================
+
+const SCENARIO_BANK_3 = [
+  // --- STABILITY: resilience, emotional reactivity ---
+  { id:'s1', phase:'early', measures:['STABILITY'],
+    text:"Sesuatu yang kamu rencanakan dengan penuh harapan gagal total, di depan orang-orang yang menyaksikannya.",
+    choices:[
+      {text:"Bangkit segera, sudah move on dalam hitungan jam.", d:{RES:5,ANX:-2}},
+      {text:"Butuh waktu beberapa hari untuk benar-benar pulih.", d:{ANX:2,RES:1}},
+      {text:"Terus memikirkannya berulang-ulang, sulit melepaskan.", d:{ANX:5,RES:-3}},
+    ]},
+  { id:'s2', phase:'early', measures:['STABILITY'],
+    text:"Kamu menghadapi ancaman mendadak yang datang tanpa peringatan sama sekali.",
+    choices:[
+      {text:"Tetap tenang, pikirkan langkah berikutnya dengan jernih.", d:{RES:6,ANX:-3}},
+      {text:"Panik sesaat, lalu pulihkan kendali diri.", d:{ANX:3,RES:2}},
+      {text:"Panik dan kesulitan berpikir jernih untuk sementara waktu.", d:{ANX:6,RES:-3}},
+    ]},
+  { id:'s3', phase:'mid', measures:['STABILITY'],
+    text:"Sesuatu yang kamu takutkan sejak lama akhirnya benar-benar terjadi.",
+    choices:[
+      {text:"Ternyata tidak seburuk yang kamu bayangkan. Kamu menanganinya dengan baik.", d:{RES:5,ANX:-4}},
+      {text:"Seburuk dugaanmu, tapi kamu sudah cukup siap secara mental.", d:{RES:3,ANX:1}},
+      {text:"Jauh lebih berat dari yang kamu bayangkan — ini menghantammu keras.", d:{ANX:6,RES:-4}},
+    ]},
+  { id:'s4', phase:'mid', measures:['STABILITY','CONSCIENTIOUS'],
+    text:"Tekanan dari berbagai arah menumpuk bersamaan — tenggat waktu, ekspektasi orang lain, dan kelelahan fisik.",
+    choices:[
+      {text:"Prioritaskan dengan kepala dingin, satu per satu.", d:{RES:5,PLN:3}},
+      {text:"Rasanya berat, tapi kamu tetap mendorong maju.", d:{ANX:3,CON:2}},
+      {text:"Mulai merasa kewalahan dan sulit fokus pada apa pun.", d:{ANX:6,RES:-3}},
+    ]},
+  { id:'s5', phase:'late', measures:['STABILITY'],
+    text:"Menjelang momen paling penting dalam perjalananmu sejauh ini, kamu menyadari betapa banyak yang dipertaruhkan.",
+    choices:[
+      {text:"Ketenangan datang justru saat ini paling dibutuhkan.", d:{RES:6,ANX:-3}},
+      {text:"Gugup, tapi itu bahan bakar, bukan penghalang.", d:{ANX:2,RES:3}},
+      {text:"Kecemasan hampir melumpuhkanmu tepat sebelum momen itu tiba.", d:{ANX:6,RES:-4}},
+    ]},
+
+  // --- HONESTY_HUMILITY: fairness, sincerity, greed ---
+  { id:'h1', phase:'early', measures:['HONESTY_HUMIL'],
+    text:"Seorang pedagang salah menghitung dan memberimu barang bernilai jauh lebih tinggi dari yang kamu bayar.",
+    choices:[
+      {text:"Beri tahu dia dan bayar selisihnya.", d:{HON:6,FAIR:4,GRD:-3}},
+      {text:"Ambil, tapi rasa bersalah tetap mengganggumu.", d:{GRD:3,HON:-2}},
+      {text:"Ambil tanpa pikir panjang. Kesempatan seperti ini jarang datang.", d:{GRD:6,FAIR:-4}},
+    ]},
+  { id:'h2', phase:'early', measures:['HONESTY_HUMIL'],
+    text:"Kamu bisa mengklaim jasa atas pekerjaan yang sebenarnya sebagian besar dilakukan orang lain, dan tidak ada yang akan membantahnya.",
+    choices:[
+      {text:"Bagikan kredit secara adil sesuai kontribusi sebenarnya.", d:{FAIR:6,HON:4}},
+      {text:"Ambil sebagian besar kredit, sebut mereka sekadar 'membantu'.", d:{FAIR:-3,GRD:3}},
+      {text:"Klaim sepenuhnya sebagai pencapaianmu sendiri.", d:{FAIR:-6,GRD:5,HON:-4}},
+    ]},
+  { id:'h3', phase:'mid', measures:['HONESTY_HUMIL'],
+    text:"Kamu menemukan cara memanipulasi sistem penilaian guild untuk naik peringkat lebih cepat, tanpa benar-benar melanggar aturan tertulis.",
+    choices:[
+      {text:"Tidak. Peringkat yang tidak benar-benar diperoleh tidak berarti apa-apa.", d:{HON:5,FAIR:4,GRD:-3}},
+      {text:"Manfaatkan sedikit, tapi tetap usaha secara nyata di sisanya.", d:{GRD:3,UTIL:2}},
+      {text:"Manfaatkan sepenuhnya. Aturan tertulis adalah aturan yang berlaku.", d:{GRD:6,FAIR:-5,HON:-3}},
+    ]},
+  { id:'h4', phase:'mid', measures:['HONESTY_HUMIL','AGREEABLENESS'],
+    text:"Seseorang yang sangat kaya menawarimu bayaran besar untuk sesuatu yang secara teknis legal, tapi terasa tidak benar.",
+    choices:[
+      {text:"Tolak. Ada harga yang tidak sepadan dibayar, meski besar.", d:{HON:6,FAIR:3,GRD:-4}},
+      {text:"Negosiasikan versi yang terasa lebih bisa diterima.", d:{UTIL:3,GRD:2}},
+      {text:"Terima. Uang sebesar itu tidak datang dua kali.", d:{GRD:6,SELF:3,HON:-3}},
+    ]},
+  { id:'h5', phase:'late', measures:['HONESTY_HUMIL'],
+    text:"Kamu sudah mengumpulkan kekayaan dan kekuasaan yang cukup besar. Sebuah kesempatan datang untuk mengambil lebih banyak lagi, dengan mengorbankan orang-orang yang lebih lemah darimu.",
+    choices:[
+      {text:"Berhenti di sini. Kamu sudah punya cukup.", d:{FAIR:6,GRD:-5,COMP:3}},
+      {text:"Ambil sedikit lebih banyak, tapi tetapkan batas untuk dirimu sendiri.", d:{GRD:3,UTIL:2}},
+      {text:"Ambil semua yang bisa kamu ambil. Kesempatan seperti ini tidak boleh disia-siakan.", d:{GRD:8,FAIR:-6,COMP:-4}},
+    ]},
+  { id:'h6', phase:'late', measures:['HONESTY_HUMIL','STABILITY'],
+    text:"Kamu diam-diam tahu kebenaran yang bisa menghancurkan reputasi seseorang yang pernah menyakitimu — dan kamu bisa menyebarkannya tanpa ada yang tahu itu darimu.",
+    choices:[
+      {text:"Tidak. Bahkan pada mereka yang menyakitimu, ini bukan caranya.", d:{HON:6,FAIR:4}},
+      {text:"Sebarkan sebagian, cukup untuk memberi konsekuensi wajar.", d:{FAIR:1,GRD:2}},
+      {text:"Sebarkan semuanya. Mereka pantas mendapatkannya.", d:{GRD:4,FAIR:-4,HON:-3}},
+    ]},
+];
+// ============================================================
+// SCENARIO BANK v3 — Batch 4: Companion-gated structural branching
+// These scenarios only appear (or fork differently) depending on WHICH
+// companion archetype is present — this is the "companion affects story
+// branching structurally" requirement, not just a stat modifier.
+// ============================================================
+
+const SCENARIO_BANK_4 = [
+  // --- Guardian (Niggel) gated: protection-flavored moral tests ---
+  { id:'g1', phase:'mid', measures:['AGREEABLENESS','STABILITY'], companionArchetype:'guardian',
+    text:"{companion} berdiri di depanmu tanpa diminta ketika bahaya mendekat — lagi. Kamu mulai bertanya-tanya apakah dia pernah membiarkan dirinya sendiri terluka demi ini.",
+    choices:[
+      {text:"Tanya langsung — dia pantas didengar, bukan cuma melindungi.", d:{COMP:5,SOC:2}, companionReactionTag:'kindness'},
+      {text:"Biarkan saja. Ini caranya menunjukkan kepedulian.", d:{COOP:2}},
+      {text:"Minta dia berhenti mengorbankan diri seperti ini setiap saat.", d:{DOM:3,COMP:3}, companionReactionTag:'kindness'},
+    ]},
+  { id:'g2', phase:'mid', measures:['HONESTY_HUMIL'], companionArchetype:'guardian',
+    text:"Ada kesempatan mengambil keuntungan dari seseorang yang lemah dan tidak bisa melawan. {companion} berdiri di sampingmu, diam, menunggu keputusanmu.",
+    choices:[
+      {text:"Tolak sepenuhnya — dengan dia di sini, ini bahkan tidak perlu dipikirkan.", d:{FAIR:5,GRD:-4}, companionReactionTag:'kindness'},
+      {text:"Ambil sedikit saja. Tidak akan terlalu terasa bagi mereka.", d:{GRD:3,FAIR:-2}, companionReactionTag:'cruelty'},
+      {text:"Ambil sepenuhnya. Dia tidak berhak menghakimi pilihanmu.", d:{GRD:6,FAIR:-5}, companionReactionTag:'cruelty'},
+    ]},
+
+  // --- Strategist (Parel/Dio) gated: efficiency vs values tension ---
+  { id:'g3', phase:'mid', measures:['CONSCIENTIOUS','OPENNESS'], companionArchetype:'strategist',
+    text:"{companion} mengusulkan rencana yang jauh lebih efisien, tapi melibatkan mengorbankan satu pihak yang tidak akan pernah tahu mereka dikorbankan.",
+    choices:[
+      {text:"Ikuti rencananya sepenuhnya. Efisiensi adalah prioritas.", d:{UTIL:6,COMP:-3}, companionReactionTag:'cleverness'},
+      {text:"Modifikasi rencananya agar tidak ada yang dirugikan, meski lebih lambat.", d:{CRE:4,COMP:3}, companionReactionTag:'excessive_pragmatism'},
+      {text:"Tolak rencana itu sepenuhnya atas dasar prinsip.", d:{HON:5,UTIL:-3}, companionReactionTag:'excessive_pragmatism'},
+    ]},
+  { id:'g4', phase:'mid', measures:['STABILITY'], companionArchetype:'strategist',
+    text:"Kamu bertindak impulsif tanpa berkonsultasi dengan {companion} dulu, dan itu hampir berakibat fatal.",
+    choices:[
+      {text:"Akui kesalahanmu dan minta maaf atas keteledoranmu.", d:{HON:4,IMP:-3}},
+      {text:"Bela dirimu — kadang insting lebih cepat dari perencanaan.", d:{IMP:3,DOM:2}, companionReactionTag:'recklessness'},
+      {text:"Abaikan komentarnya. Hasilnya toh baik-baik saja.", d:{IMP:5,COOP:-3}, companionReactionTag:'recklessness'},
+    ]},
+
+  // --- Idealist (Bayu) gated: integrity pressure tests ---
+  { id:'g5', phase:'mid', measures:['HONESTY_HUMIL'], companionArchetype:'idealist',
+    text:"Berbohong sedikit kepada {companion} sekarang akan membuat semuanya jauh lebih mudah, dan dia mungkin tidak akan pernah tahu.",
+    choices:[
+      {text:"Katakan yang sebenarnya, meski akan membuatnya kecewa.", d:{HON:6,FAIR:3}, companionReactionTag:'integrity'},
+      {text:"Berikan versi yang sedikit dilembutkan, tidak sepenuhnya bohong.", d:{HON:1,CRE:2}},
+      {text:"Berbohong sepenuhnya. Lebih mudah begini.", d:{HON:-6,FAIR:-3}, companionReactionTag:'dishonesty'},
+    ]},
+  { id:'g6', phase:'mid', measures:['AGREEABLENESS'], companionArchetype:'idealist',
+    text:"{companion} bersikeras membantu seseorang yang jelas-jelas tidak bisa membalas budi apa pun. Kamu bisa mendukungnya atau menariknya pergi.",
+    choices:[
+      {text:"Dukung penuh. Dia benar untuk peduli tanpa pamrih.", d:{COMP:5,COOP:3}, companionReactionTag:'integrity'},
+      {text:"Bantu seadanya, tapi ingatkan dia soal batas waktu dan sumber daya.", d:{UTIL:3,PLN:2}},
+      {text:"Tarik dia pergi. Ini bukan urusan kalian.", d:{SELF:4,COMP:-3}, companionReactionTag:'moral_compromise'},
+    ]},
+
+  // --- Drifter (Dodo/Zen) gated: low-friction, mostly reveals player's own values ---
+  { id:'g7', phase:'mid', measures:['OPENNESS','STABILITY'], companionArchetype:'drifter',
+    text:"{companion} mengusulkan jalan pintas yang sangat tidak konvensional — dan kemungkinan besar ilegal di kota berikutnya.",
+    choices:[
+      {text:"Ikuti. Dia biasanya tahu apa yang dia lakukan.", d:{RISK:5,CUR:3}, companionReactionTag:'anything_extreme'},
+      {text:"Dengarkan idenya, tapi buat keputusan sendiri.", d:{IND:3,LOG:2}},
+      {text:"Tolak. Terlalu berisiko untuk keuntungan yang tidak jelas.", d:{CON:4,RISK:-3}},
+    ]},
+];
+
+// ============================================================
+// SCENARIO BANK v3 — Batch 5: Cross-cluster + dice-based (kept from v2
+// pattern, retagged with construct-driven `measures`)
+// ============================================================
+
+const SCENARIO_BANK_5 = [
+  { id:'d1', phase:'early', measures:['APPLIED'], dice:{stat:'INT', target:45, allowsCompanionHelp:false},
+    text:"Kamu menemukan mekanisme kunci kuno yang rumit di sebuah reruntuhan. Kamu punya satu kesempatan untuk memecahkannya sebelum jebakan aktif.",
+    outcomes:{
+      crit_win:{text:"Kamu membaca pola kunci itu seolah sudah pernah melihatnya. Terbuka sempurna, tanpa jebakan aktif sama sekali.", d:{INT:5,CRE:3}},
+      win:{text:"Butuh waktu, tapi kamu berhasil memecahkannya sebelum jebakan sempat bereaksi.", d:{INT:3,CON:2}},
+      close:{text:"Kamu berhasil, tapi memicu sedikit jebakan di detik terakhir — hanya luka gores.", d:{INT:2,RES:2,VIT:-3}},
+      lose:{text:"Mekanismenya terlalu rumit. Jebakan aktif, dan kamu harus lari secepat mungkin.", d:{RES:-2,VIT:-6}},
+    }},
+  { id:'d2', phase:'mid', measures:['APPLIED'], dice:{stat:'STR', target:55, allowsCompanionHelp:true},
+    text:"Sebuah batu besar menutupi satu-satunya jalan keluar dari gua ini.",
+    outcomes:{
+      crit_win:{text:"Dengan satu dorongan kuat, batu itu bergeser lebih mudah dari dugaanmu.", d:{STR:5,RES:2}},
+      win:{text:"Butuh seluruh tenagamu, tapi batu itu akhirnya bergeser cukup untuk lewat.", d:{STR:3}},
+      close:{text:"Batu bergeser sedikit — cukup untuk menyelinap, tapi kamu terluka saat memaksanya.", d:{STR:2,VIT:-4}},
+      lose:{text:"Batu itu tidak bergeming. Kamu harus mencari jalan lain, membuang waktu berharga.", d:{VIT:-3,RES:-2}},
+    }},
+  { id:'d3', phase:'mid', measures:['APPLIED','EXTRAVERSION'], requiresCompanion:true, dice:{stat:'SOC', target:50, allowsCompanionHelp:true},
+    text:"Kamu perlu meyakinkan penjaga gerbang kota untuk membiarkan kalian berdua masuk tanpa dokumen resmi.",
+    outcomes:{
+      crit_win:{text:"Kata-katamu begitu meyakinkan, penjaga itu bahkan menawarkan bantuan tambahan.", d:{CHA:5,SOC:3}},
+      win:{text:"Penjaga itu ragu sejenak, lalu mengangguk dan membiarkan kalian lewat.", d:{SOC:3,CHA:2}},
+      close:{text:"Penjaga curiga tapi akhirnya membiarkan kalian masuk — dengan catatan namamu dicatat.", d:{SOC:1,RISK:2}},
+      lose:{text:"Penjaga tidak percaya sama sekali. Kalian harus mencari jalan lain, dan itu memakan waktu berharga.", d:{SOC:-2,RES:-1}},
+    }},
+  { id:'d4', phase:'mid', measures:['STABILITY','APPLIED'], dice:{stat:'RES', target:52, allowsCompanionHelp:false},
+    text:"Rasa lapar, dingin, dan kelelahan menumpuk selama perjalanan panjang tanpa istirahat yang cukup.",
+    outcomes:{
+      crit_win:{text:"Entah bagaimana, tubuhmu terus bergerak dengan mantap. Kamu bahkan mendorong yang lain untuk terus maju.", d:{RES:5,VIT:2}},
+      win:{text:"Berat, tapi kamu bertahan sampai kesempatan istirahat berikutnya.", d:{RES:3}},
+      close:{text:"Kamu nyaris ambruk beberapa kali, tapi berhasil terus melangkah.", d:{RES:1,VIT:-3}},
+      lose:{text:"Tubuhmu menyerah lebih dulu. Kamu harus dipapah sisa perjalanan.", d:{VIT:-6,SELF:-2}},
+    }},
+  { id:'d5', phase:'mid', measures:['OPENNESS','APPLIED'], requiresCompanion:true, dice:{stat:'LOG', target:50, allowsCompanionHelp:true},
+    text:"Kalian terjebak dalam ruangan dengan teka-teki yang harus dipecahkan sebelum udara habis.",
+    outcomes:{
+      crit_win:{text:"Kamu melihat solusinya dalam hitungan detik, dan menjelaskannya ke {companion} dengan tenang.", d:{LOG:5,INT:2}},
+      win:{text:"Butuh diskusi singkat dengan {companion}, tapi kalian memecahkannya tepat waktu.", d:{LOG:3,SOC:1}},
+      close:{text:"Kalian memecahkannya di detik-detik terakhir, jantung berdebar kencang.", d:{LOG:1,RES:2}},
+      lose:{text:"Waktu habis sebelum kalian menemukan solusinya — untungnya ruangan itu ternyata tidak semematikan yang terlihat.", d:{LOG:-1,RES:-1}},
+    }},
+
+  // --- Chained scenarios (setup + direct payoff, per v2's fix) ---
+  { id:'ch1', phase:'early', measures:['HONESTY_HUMIL','AGREEABLENESS'],
+    text:"Kamu menemukan peti tergeletak di kemah yang ditinggalkan, berisi 500 keping emas. Tidak ada pemiliknya, dan kamu belum makan selama dua hari.",
+    chain:[
+      { choices:[
+          {text:"Ambil semuanya.", d:{SELF:6,GRD:4,HON:-4,RISK:2}, next:1},
+          {text:"Ambil secukupnya saja.", d:{COMP:4,CON:3,SELF:1}, next:1},
+          {text:"Cari pemiliknya dulu.", d:{HON:6,FAIR:4,CON:2}, next:null},
+          {text:"Tinggalkan, tapi tandai lokasinya.", d:{LOG:4,CON:3,SELF:-2}, next:null},
+        ]},
+      { text:"Seminggu kemudian, kamu tahu peti itu milik keluarga miskin yang membutuhkannya untuk operasi anak mereka.",
+        choices:[
+          {text:"Tidak merasa bersalah. Bertahan hidup lebih penting.", d:{SELF:4,COMP:-5,GRD:3}},
+          {text:"Merasa bersalah, tapi tidak berbuat apa-apa.", d:{COMP:2,IMP:-2}},
+          {text:"Coba kembalikan sisanya, atau bantu dengan cara lain.", d:{COMP:6,HON:4,FAIR:3}},
+          {text:"Cari pembenaran — kamu tidak tahu, semua sudah terjadi.", d:{GRD:3,SELF:2,COMP:-2}},
+        ]},
+    ]},
+  { id:'ch2', phase:'mid', measures:['AGREEABLENESS','STABILITY'],
+    text:"Sebuah orang asing terluka di pinggir jalan, mengaku diserang perampok.",
+    chain:[
+      { timed:true,
+        choices:[
+          {text:"Tolong dia segera.", d:{COMP:6,TRU:3,RISK:2}, next:1},
+          {text:"Interogasi dulu.", d:{LOG:5,PER:3,TRU:-2}, next:2},
+          {text:"Tinggalkan. Ada yang terasa aneh.", d:{PER:4,SELF:4,TRU:-3}, next:null},
+        ]},
+      { text:"Begitu kamu mendekat untuk membantu, kamu sadar ini jebakan — orang itu bukan korban sungguhan.",
+        choices:[
+          {text:"Merasa bodoh karena terlalu mudah percaya.", d:{TRU:-6,RES:2}},
+          {text:"Untung insting lain masih menyelamatkanmu tepat waktu.", d:{PER:4,LOG:3}},
+          {text:"Tertawakan saja — pelajaran diambil.", d:{RES:5,ADP:3}},
+        ]},
+      { text:"Interogasimu justru membongkar kebohongannya — dia memang berencana menjebakmu.",
+        choices:[
+          {text:"Biarkan dia pergi, sudah cukup mempermalukannya.", d:{COMP:2,DOM:1}},
+          {text:"Serahkan pada penjaga setempat.", d:{JUST:4,HON:2}},
+          {text:"Balas setimpal, agar dia jera.", d:{DOM:4,HON:-2}},
+        ]},
+    ]},
+];
+// ============================================================
+// CLASS SYSTEM v3 — adapted to new construct-driven trait keys
+// (kept the Family->Evolution structure from v2, which worked well)
+// ============================================================
+const CLASS_FAMILIES = [
+  { id:'warrior', name:'Pejuang', match:t=>t.RISK*0.35+t.DOM*0.25+t.STR*0.25+(100-t.CRE)*0.15,
+    reason:"Kesediaanmu berulang kali menghadapi bahaya secara langsung, dikombinasikan dengan sedikitnya kesabaran untuk cara-cara halus, menarikmu ke kehidupan yang dibangun di atas konfrontasi langsung." },
+  { id:'mage', name:'Penyihir', match:t=>t.INT*0.35+t.CRE*0.3+t.CUR*0.2+t.LOG*0.15,
+    reason:"Pikiranmu selalu mencari pola yang mendasari segala sesuatu, dan rasa ingin tahumu berarti kamu tidak pernah puas dengan penjelasan di permukaan." },
+  { id:'scholar', name:'Sarjana', match:t=>t.INT*0.3+t.LOG*0.3+t.CON*0.2+t.PLN*0.2,
+    reason:"Kamu berulang kali memilih mempelajari masalah daripada terburu-buru, dan disiplinmu membuat proses belajar itu benar-benar menjadi penguasaan seiring waktu." },
+  { id:'cleric', name:'Pendeta', match:t=>t.COMP*0.35+t.HON*0.25+t.LOY*0.2+t.FAIR*0.2,
+    reason:"Keputusanmu berulang kali melindungi orang lain meski merugikan dirimu sendiri. Pola kasih sayang dan konsistensi moral itu menjadi panggilan hidup, bukan sekadar sifat." },
+  { id:'rogue', name:'Pengembara Bayangan', match:t=>t.PER*0.3+(100-t.SOC)*0.2+t.AGI*0.25+(100-t.HON)*0.25,
+    reason:"Kamu menyelesaikan masalah secara diam-diam dan sendirian, lebih memilih hasil daripada pengakuan — dan jarang membiarkan prinsip memperlambatmu ketika hasil lebih penting." },
+  { id:'vanguard', name:'Garda Depan', match:t=>t.DOM*0.25+t.LOY*0.3+t.RES*0.25+t.STR*0.2,
+    reason:"Berbeda dari pelindung yang murni bertahan, kamu berulang kali memilih menghadapi bahaya di depan orang-orang yang kau sayangi, menanggung risikonya sendiri." },
+  { id:'wildcard', name:'Kartu Liar', match:t=>t.CRE*0.3+t.GRD*0.2+(100-t.CON)*0.25+t.PER*0.25,
+    reason:"Kamu tidak pernah cocok bersih dengan satu tradisi. Kreativitas dan pragmatismemu membuatmu menekuk aturan setiap kali aturan tidak cocok dengan situasi." },
+];
+
+const CLASS_EVOLUTIONS = {
+  cleric: [
+    { id:'inquisitor', name:'Inkuisitor', cond:t=>t.JUST>65&&t.DOM>55&&t.COMP<55, reason:"Orientasi keadilanmu tetap tinggi, tapi kasih sayangmu menyempit seiring waktu — kamu menjadi orang yang menegakkan kebenaran, bukan sekadar menghibur." },
+    { id:'saint', name:'Santa/Santo', cond:t=>t.COMP>70&&t.SELF<45, reason:"Kamu berulang kali menempatkan orang lain di atas keamanan dan kenyamananmu sendiri. Ketidakegoisan itu berlipat menjadi sesuatu yang mulai disebut orang suci." },
+    { id:'heretic', name:'Bidah', cond:t=>t.CRE>65&&t.CON<45, reason:"Kamu terus mempertanyakan doktrin alih-alih menerimanya, dan rendahnya konformitasmu membuat pertanyaan itu akhirnya menjadi perlawanan terbuka." },
+    { id:'battle_priest', name:'Pendeta Tempur', cond:t=>t.RISK>60&&t.HON>55, reason:"Keyakinan tak pernah menghentikanmu mengayunkan senjata ketika diperlukan — kamu membawa berkat sekaligus pedang." },
+  ],
+  warrior: [
+    { id:'gladiator', name:'Gladiator', cond:t=>t.RISK>65&&t.CHA>55, reason:"Kamu tidak hanya bertarung — kamu bertarung di depan orang, dan sebagian dirimu belajar untuk hidup dari perhatian itu." },
+    { id:'guardian', name:'Penjaga', cond:t=>t.LOY>65&&t.COMP>55, reason:"Kekuatanmu terus menemukan arah: menuju orang-orang yang kau setiai, bukan menuju kejayaan pribadi." },
+    { id:'destroyer', name:'Penghancur', cond:t=>t.DOM>70&&t.COMP<45, reason:"Dominasi terus mengalahkan kasih sayang dalam keputusanmu, sampai perbedaan antara menang dan menghancurkan berhenti berarti bagimu." },
+    { id:'berserker', name:'Berserker', cond:t=>t.IMP>65&&t.RISK>60, reason:"Kamu berhenti menghitung peluang sebelum bertarung sejak lama. Sesuatu dalam dirimu butuh kekacauan lebih dari butuh strategi." },
+  ],
+  rogue: [
+    { id:'reaper', name:'Pencabut Nyawa', cond:t=>t.SELF>60&&t.HON<45, reason:"Mempertahankan diri secara konsisten mengalahkan kehormatan dalam pilihanmu — efisien, tak sentimental." },
+    { id:'trickster', name:'Penipu Ulung', cond:t=>t.CRE>65&&t.SOC>50, reason:"Kamu tidak pernah perlu menjadi yang terkuat di ruangan — kamu hanya perlu semua orang percaya sesuatu yang salah." },
+    { id:'shadow_broker', name:'Pialang Bayangan', cond:t=>t.SOC>55&&t.UTIL>60, reason:"Kamu sadar informasi bernilai lebih dari sekadar satu nyawa — kamu mulai berdagang rahasia." },
+    { id:'phantom', name:'Momok', cond:t=>t.PER>65&&t.SOC<40, reason:"Kamu berhenti butuh siapa pun mengenal namamu. Tak terlihat jadi lebih berguna daripada dikenang." },
+  ],
+  mage: [
+    { id:'elemental_lord', name:'Penguasa Elemen', cond:t=>t.DOM>60&&t.RISK>55, reason:"Kamu berhenti mempelajari kekuatan dengan hati-hati dan mulai menggunakannya secara langsung." },
+    { id:'archmage', name:'Arch Mage', cond:t=>t.INT>65&&t.CON>60&&t.CRE>55, reason:"Disiplin dan bakat mentah berhenti menjadi dua hal terpisah. Kamu menguasai tata bahasa dasar sihir itu sendiri." },
+    { id:'hexweaver', name:'Penenun Kutuk', cond:t=>t.CRE>60&&t.HON<45, reason:"Kamu berhenti peduli apakah sebuah mantra dianggap 'gelap' — kamu hanya peduli apakah itu bekerja." },
+  ],
+  scholar: [
+    { id:'engineer', name:'Insinyur', cond:t=>t.LOG>65&&t.CON>60, reason:"Teori saja tak pernah memuaskanmu — kamu terus mendorong ide sampai menjadi sesuatu yang benar-benar berfungsi." },
+    { id:'philosopher', name:'Filsuf', cond:t=>t.CRE>55&&t.CUR>55&&t.CON<50, reason:"Pertanyaan bagaimana melakukan sesuatu jadi kurang penting dibanding pertanyaan apakah itu seharusnya dilakukan." },
+    { id:'strategist', name:'Ahli Strategi', cond:t=>t.LOG>60&&t.DOM>50, reason:"Kamu mulai melihat setiap konflik sebagai struktur yang harus dipecahkan, bukan pertarungan yang dimenangkan dengan kekuatan." },
+  ],
+  vanguard: [
+    { id:'bringer', name:'Pembawa Bencana', cond:t=>t.DOM>65&&t.RISK>60, reason:"Melindungi orang perlahan berubah menjadi lebih mirip penaklukan — batas antara membela dan mendominasi kabur di bawah dominasimu." },
+    { id:'chaser', name:'Pengejar', cond:t=>t.RES>60&&t.IND>55, reason:"Kamu tak pernah berhenti bergerak menuju ancaman, sendirian jika perlu, cukup tangguh untuk terus maju." },
+    { id:'spear_saint', name:'Santo Tombak', cond:t=>t.HON>60&&t.CON>55, reason:"Disiplinmu nyaris seperti devosi — footwork, jarak, dan timing dilatih seperti kitab suci." },
+  ],
+  wildcard: [
+    { id:'dark_avenger', name:'Pembalas Kegelapan', cond:t=>t.HON<40&&t.JUST>55, reason:"Kamu masih percaya pada keadilan, tapi berhenti percaya aturan bisa mewujudkannya — jadi kamu mewujudkannya sendiri." },
+    { id:'fate_weaver', name:'Penenun Takdir', cond:t=>t.PER>60&&t.UTIL>55, reason:"Kamu jadi sangat mahir membaca ke arah mana peristiwa sudah condong, dan mulai mendorongnya pelan-pelan." },
+    { id:'chaos_agent', name:'Agen Kekacauan', cond:t=>t.RISK>60&&t.CON<40, reason:"Kamu belajar bahwa keteraturan sering kali cuma ilusi yang menguntungkan segelintir orang — dan kamu berhenti menghormatinya." },
+  ],
+};
+
+function computeClass(traits) {
+  let best=null, bestScore=-Infinity;
+  CLASS_FAMILIES.forEach(c=>{ const s=c.match(traits); if(s>bestScore){bestScore=s;best=c;} });
+  const evolutions = CLASS_EVOLUTIONS[best.id] || [];
+  const matched = evolutions.filter(e=>e.cond(traits));
+  const evolution = matched.length ? matched[0] : null;
+  const almostReached = evolutions.filter(e => e !== evolution).slice(0,2);
+  const sorted = CLASS_FAMILIES.map(c=>({c,s:c.match(traits)})).sort((a,b)=>b.s-a.s);
+  const secondary = sorted[1]?.c;
+  return { primary:best, evolution, secondary, almostReached, affinity: Math.min(97, Math.round(60+(bestScore/100)*8)) };
+}
+
+// full list for the settings "class database" viewer
+function allClassPaths() {
+  const paths = [];
+  CLASS_FAMILIES.forEach(fam => {
+    const evos = CLASS_EVOLUTIONS[fam.id] || [];
+    if (evos.length === 0) paths.push({ family: fam.name, evolution: null });
+    evos.forEach(e => paths.push({ family: fam.name, evolution: e.name }));
+  });
+  return paths;
+}
+
+const WEAPONS = [
+  { id:'sword', name:'Pedang', score:t=>(t.RISK+t.DOM)/2 },
+  { id:'spear', name:'Tombak', score:t=>(t.LOY+t.RES)/2 },
+  { id:'bow', name:'Busur', score:t=>(t.PER+t.AGI)/2 },
+  { id:'dagger', name:'Belati', score:t=>(t.PER+(100-t.SOC))/2 },
+  { id:'staff', name:'Tongkat / Grimoire', score:t=>(t.INT+t.CRE)/2 },
+  { id:'fist', name:'Tangan Kosong', score:t=>(t.RISK+t.RES)/2 },
+];
+function computeWeapon(traits) {
+  const scored = WEAPONS.map(w=>({ w, s: w.score(traits) })).sort((a,b)=>b.s-a.s);
+  const top = scored[0];
+  return { weapon: top.w, affinity: Math.round(Math.min(97, 55 + top.s*0.4)), skill: Math.round(Math.max(5, top.s*0.25)), potential: Math.round(Math.min(99, 70 + top.s*0.25)) };
+}
+
+// ============================================================
+// SINGLE WORLD — medieval isekai, Re:Zero/Tensura/Mushoku Tensei game-like
+// systems blended with Grimgar/Dungeon Meshi tonal grit. No lore-dump
+// screen per user's instruction — texture emerges through consequence only.
+// ============================================================
+const WORLD = {
+  id:'aldenreach', name:'Aldenreach',
+  desc:"Sebuah dunia dengan sistem yang aneh: setiap makhluk hidup di sini punya semacam 'Status' yang bisa dirasakan, bukan sekadar dilihat — kekuatan, kelemahan, potensi, semuanya seolah tercatat oleh sesuatu yang tak seorang pun benar-benar pahami. Guild petualang berdiri di setiap kota besar, mengorganisir mereka yang mencari nafkah dari bahaya. Di luar tembok kota, dunia ini tidak ramah.",
+  statMod: { RES:2, ADP:2 },
+};
+
+// ============================================================
+// DICE ENGINE (unchanged from v2, still solid)
+// ============================================================
+function rollDice(sides=20) { return Math.floor(Math.random() * sides) + 1; }
+function rollCheck(statValue, target, sides=20, assistBonus=0) {
+  const roll = rollDice(sides);
+  const total = statValue + assistBonus + roll;
+  const margin = total - target;
+  let outcome;
+  if (roll === sides) outcome = 'crit_win';
+  else if (roll === 1 && margin < 0) outcome = 'crit_lose';
+  else if (margin >= 15) outcome = 'crit_win';
+  else if (margin >= 0) outcome = 'win';
+  else if (margin >= -8) outcome = 'close';
+  else outcome = 'lose';
+  return { roll, statValue, assistBonus, total, target, margin, outcome };
+}
+function autoResolveCheck(statValue, target, sides=20, assistBonus=0) {
+  const effectiveStat = statValue + assistBonus;
+  if (effectiveStat + 1 >= target) return { outcome: 'crit_win', auto: true, statValue, assistBonus, total: effectiveStat, target };
+  if (effectiveStat + sides < target - 10) return { outcome: 'crit_lose', auto: true, statValue, assistBonus, total: effectiveStat, target };
+  return null;
+}
+function companionAssistBonus(companion, bond, statKey, situationAllowsHelp) {
+  if (!companion || !situationAllowsHelp) return 0;
+  if (typeof state !== 'undefined' && state.companionStatus && state.companionStatus !== 'with_you') return 0;
+  const relevantStat = companion.stats[statKey];
+  if (relevantStat === undefined) return bond >= 35 ? 1 : 0;
+  const bondFactor = bond >= 75 ? 1 : bond >= 35 ? 0.6 : 0.3;
+  return Math.round((relevantStat / 100) * 5 * bondFactor);
+}
+const OUTCOME_LABEL = {
+  crit_win: { text: 'BERHASIL SEMPURNA', class: 'win' },
+  win: { text: 'BERHASIL', class: 'win' },
+  close: { text: 'NYARIS GAGAL', class: 'close' },
+  lose: { text: 'GAGAL', class: 'lose' },
+  crit_lose: { text: 'GAGAL TOTAL', class: 'lose' },
+};
+// ============================================================
+// GOAL SYSTEM — simplified for single-world (Aldenreach)
+// ============================================================
+const GOALS = [
+  { id:'strongest', label:'Menjadi yang Terkuat', match:t=>(t.RISK+t.DOM+t.RES+t.STR)/4,
+    objectives:['Menemukan seorang guru yang layak','Menguasai gaya bertarungmu sendiri','Mengalahkan rival pertama','Naik ke peringkat guild yang disegani','Menghadapi lawan yang selama ini dianggap tak terkalahkan'] },
+  { id:'leader', label:'Membangun Sesuatu yang Bertahan', match:t=>(t.DOM+t.SOC+t.CHA+t.PLN)/4,
+    objectives:['Membangun kepercayaan sekelompok kecil orang','Menyelesaikan konflik internal pertamamu','Memperluas pengaruhmu ke luar kelompok awal','Menghadapi pengkhianatan dari dalam','Mempertahankan apa yang kamu bangun dalam krisis besar'] },
+  { id:'truth', label:'Menemukan Kebenaran Tersembunyi Dunia Ini', match:t=>(t.INT+t.CUR+t.PER)/3,
+    objectives:['Menemukan petunjuk pertama tentang asal-usul "Status"','Mempertaruhkan sesuatu untuk menyelidikinya lebih jauh','Menghadapi pihak yang ingin kebenaran itu tetap terkubur','Mengungkap sesuatu yang mengubah pandanganmu sendiri','Memutuskan apa yang kau lakukan setelah tahu semuanya'] },
+  { id:'wealth', label:'Mengumpulkan Kekayaan dan Pengaruh', match:t=>(t.GRD+t.RISK+t.SOC)/3,
+    objectives:['Mendapatkan modal awal, dengan cara apa pun','Membangun usaha atau sumber penghasilan tetap','Bertahan dari kerugian besar pertamamu','Memperluas kekayaanmu melampaui satu kota','Memutuskan apa yang benar-benar kau lakukan dengan kekayaan itu'] },
+  { id:'protect', label:'Melindungi Orang-Orang di Sekitarmu', match:t=>(t.LOY+t.COMP+t.COOP)/3,
+    objectives:['Memastikan kebutuhan dasar mereka terpenuhi','Menghadapi ancaman pertama terhadap mereka','Membuat keputusan sulit demi keamanan mereka','Menyeimbangkan ambisi pribadi dengan tanggung jawab','Menerima bahwa tidak semua bisa kau lindungi'] },
+  { id:'peace', label:'Hidup dengan Tenang', match:t=>(t.CON+(100-t.RISK)+t.SELF)/3,
+    objectives:['Menemukan tempat yang terasa seperti rumah','Menolak godaan untuk kembali ke kehidupan yang lebih besar','Membangun rutinitas yang benar-benar terasa milikmu','Menghadapi rasa bersalah atau penyesalan yang muncul diam-diam','Menerima bahwa ketenangan adalah pencapaian, bukan pelarian'] },
+];
+
+const OUTCOME_TITLES = [
+  { cond:t=>t.CON>55&&t.RISK<50, text:'Kehidupan Tenang yang Berarti' },
+  { cond:t=>t.JUST>60&&t.SELF<55, text:'Sang Pahlawan yang Enggan' },
+  { cond:t=>t.DOM>65&&t.SOC<45, text:'Yang Terkuat, dan Paling Sendirian' },
+  { cond:t=>t.PER>60&&t.SOC<50, text:'Legenda yang Tak Dikenali Siapa Pun' },
+  { cond:t=>t.GRD>65&&t.FAIR<40, text:'Yang Mendapat Segalanya, dan Kehilangan Segalanya' },
+  { cond:t=>t.COMP>60&&t.SOC>55, text:'Yang Tak Pernah Terlupakan' },
+  { cond:()=>true, text:'Sebuah Kehidupan yang Utuh' },
+];
+function computeOutcomeTitle(traits) { return OUTCOME_TITLES.find(o=>o.cond(traits)); }
+
+function computeLifespan(traits, hasCompanion) {
+  let base = 45;
+  base += (traits.RES-50)*0.25; base += (traits.CON-50)*0.15; base += (traits.SELF-50)*0.1;
+  base -= Math.max(0,traits.RISK-65)*0.2; base -= Math.max(0,traits.IMP-65)*0.1;
+  if (hasCompanion) base += 3;
+  base += (Math.random()*14-7);
+  return Math.max(19, Math.round(base));
+}
+function computeGoalProgress(traits, goalId) {
+  const goal = GOALS.find(g=>g.id===goalId);
+  if (!goal) return 50;
+  return Math.round(Math.min(96, Math.max(20, goal.match(traits) + (Math.random()*10-5))));
+}
+function computeFamilyOutcome(traits, companion, bond, lifespan) {
+  const socialPull = (traits.SOC + traits.COMP) / 2;
+  let partnered = false, partnerIsCompanion = false;
+  if (companion && bond >= 75) {
+    partnerIsCompanion = Math.random() < 0.55;
+    partnered = partnerIsCompanion || Math.random() < (socialPull/140);
+  } else {
+    partnered = Math.random() < (socialPull/160);
+  }
+  let children = 0;
+  if (partnered && lifespan > 26) {
+    const chances = Math.min(3, Math.floor((lifespan-24)/14));
+    for (let i=0;i<chances;i++) if (Math.random() < 0.6) children++;
+  }
+  let grandchildren = 0;
+  if (children > 0 && lifespan > 58) grandchildren = Math.round(children * (Math.random()*2.2));
+  return { partnered, partnerIsCompanion, children, grandchildren };
+}
+// ============================================================
+// SECOND LIFE v3 — MAIN ENGINE
+// ============================================================
+
+const FULL_SCENARIO_BANK = [
+  ...SCENARIO_BANK_1, ...SCENARIO_BANK_2, ...SCENARIO_BANK_3,
+  ...SCENARIO_BANK_4, ...SCENARIO_BANK_5,
+];
+
+const state = {
+  screen: 'landing',
+  name: '',
+  gender: null,
+  wantChoice: null,
+  kindChoice: null,
+  companion: null,
+  companionStatus: 'with_you',
+  companionStatusReason: null,
+  nickname: null,
+  bond: 0,
+  world: WORLD,
+  traits: newTraitState(),
+  confidence: newConfidenceState(),
+  contradiction: newContradictionState(),
+  mental: { hope:65, anx:20 },
+  // settings — user-configurable question count range
+  minQuestions: 35,
+  maxQuestions: 35,
+  usedScenarioIds: new Set(),
+  activeScenario: null,
+  chainIndex: 0,
+  questionsAsked: 0,
+  goal: null,
+  objectives: [],
+  lifeEvents: [],
+  eventIndex: 0,
+  eventLog: [],
+  lastDiceResult: null,
+  history: [],
+  derivedLabels: [],
+  // lifestage: childhood/adolescence scenarios run before the main assessment
+  lifestageQueue: [],
+  lifestageIndex: 0,
+  // hard choice tracking
+  hardChoicesUsed: new Set(),
+  pendingAftermath: null, // { text, delayMs } — shown on a later screen transition
+  usedHardChoiceIds: new Set(),
+  gameEndedEarly: false,
+  earlyEndingText: null,
+  pendingHardChoice: null,
+  pendingHardChoiceResult: null,
+};
+
+// ============================================================
+// TOAST NOTIFICATIONS (unchanged, still solid)
+// ============================================================
+function showToast(text, positive) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const el = document.createElement('div');
+  el.className = 'toast ' + (positive === true ? 'positive' : positive === false ? 'negative' : '');
+  el.textContent = text;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 1700);
+}
+function toastForDelta(delta) {
+  const entries = Object.entries(delta || {});
+  entries.forEach(([k, v], i) => {
+    setTimeout(() => {
+      const label = TRAIT_LABELS[k] || k;
+      const sign = v > 0 ? '+' : '';
+      showToast(`${label} ${sign}${v}`, v > 0);
+    }, i * 160);
+  });
+}
+function toastBond(delta, name) {
+  if (!delta) return;
+  const sign = delta > 0 ? '+' : '';
+  showToast(`Ikatan dengan ${name} ${sign}${delta}`, delta > 0);
+}
+
+// ============================================================
+// CORE STATE MUTATIONS
+// ============================================================
+function applyDelta(delta, measures) {
+  if (!delta) return;
+  Object.entries(delta).forEach(([k, v]) => {
+    if (state.traits[k] === undefined) state.traits[k] = 50;
+    state.traits[k] = Math.max(0, Math.min(100, state.traits[k] + v));
+  });
+  if (measures) updateConfidence(state.confidence, state.contradiction, measures, delta);
+  toastForDelta(delta);
+}
+function applyBondDelta(delta) {
+  if (!delta || !state.companion) return;
+  state.bond = Math.max(0, Math.min(100, state.bond + delta));
+  toastBond(delta, state.nickname || state.companion.name);
+}
+
+function goTo(screen) {
+  state.screen = screen;
+  render();
+  if (typeof window !== 'undefined') window.scrollTo(0, 0);
+}
+
+// ============================================================
+// COMPANION ROLL
+// ============================================================
+function rollCompanion() {
+  if (state.kindChoice === 'kindAlone') { state.companion = null; return; }
+  const weights = COMPANION_WEIGHTS[state.kindChoice] || {};
+  const pool = [];
+  COMPANIONS.forEach(c => {
+    const w = weights[c.id] || 1;
+    for (let i = 0; i < w; i++) pool.push(c);
+  });
+  state.companion = pool[Math.floor(Math.random() * pool.length)];
+  state.bond = STARTING_BOND[state.kindChoice] || 15;
+}
+
+// ============================================================
+// ADAPTIVE ASSESSMENT FLOW
+// ============================================================
+function currentPhaseForProgress() {
+  const ratio = state.questionsAsked / state.maxQuestions;
+  if (ratio < 0.35) return 'early';
+  if (ratio < 0.75) return 'mid';
+  return 'late';
+}
+
+function pickNextScenario() {
+  const phase = currentPhaseForProgress();
+  let scenario = selectNextScenario(FULL_SCENARIO_BANK, state.usedScenarioIds, phase, state.companion, state.confidence, state.contradiction);
+  if (!scenario) {
+    // fallback: try any phase if the current one is exhausted
+    for (const p of ['early','mid','late']) {
+      scenario = selectNextScenario(FULL_SCENARIO_BANK, state.usedScenarioIds, p, state.companion, state.confidence, state.contradiction);
+      if (scenario) break;
+    }
+  }
+  return scenario;
+}
+
+function startAssessment() {
+  state.lifestageQueue = pickLifestageScenarios(6);
+  state.lifestageIndex = 0;
+  state.chainIndex = 0;
+  goTo('lifestage');
+}
+
+function getCurrentLifestageNode() {
+  const s = state.lifestageQueue[state.lifestageIndex];
+  if (!s) return null;
+  return { text: s.text, choices: s.choices };
+}
+
+function answerLifestage(choiceIdx) {
+  const s = state.lifestageQueue[state.lifestageIndex];
+  const choice = s.choices[choiceIdx];
+  applyDelta(choice.d, s.measures);
+  state.lifestageIndex++;
+  if (state.lifestageIndex >= state.lifestageQueue.length) {
+    beginMainAssessment();
+  } else {
+    render();
+  }
+}
+
+function beginMainAssessment() {
+  state.usedScenarioIds = new Set();
+  state.questionsAsked = 0;
+  state.chainIndex = 0;
+  state.activeScenario = pickNextScenario();
+  goTo('assessment');
+}
+
+function interpolateCompanionName(text) {
+  if (!text) return text;
+  const name = state.companion ? (state.nickname || state.companion.name) : '';
+  return text.replace(/\{companion\}/g, name);
+}
+
+function getCurrentNode() {
+  const s = state.activeScenario;
+  if (!s) return null;
+  if (!s.chain) return { text: interpolateCompanionName(s.text), choices: s.choices, dice: s.dice, timed: s.timed, outcomes: s.outcomes, companionReactionTag: s.companionReactionTag };
+  const node = s.chain[state.chainIndex];
+  return { text: interpolateCompanionName(node.text || s.text), choices: node.choices, dice: node.dice, timed: node.timed };
+}
+
+function answerScenario(choiceIdx, node) {
+  const choice = node.choices[choiceIdx];
+  applyDelta(choice.d, state.activeScenario.measures);
+
+  // companion structural reaction: fires inline if this choice/scenario is
+  // tagged and the companion has a matching reaction line
+  const tag = choice.companionReactionTag || node.companionReactionTag;
+  if (tag && state.companion) {
+    const reaction = companionReactionFor(state.companion, tag);
+    if (reaction) {
+      setTimeout(() => showToast(`💬 ${reaction}`, null), 400);
+    }
+  }
+
+  // chained scenario: move to next node without leaving this scenario
+  if (state.activeScenario.chain && choice.next !== undefined && choice.next !== null) {
+    state.chainIndex = choice.next;
+    render();
+    return;
+  }
+
+  finishScenario();
+}
+
+function finishScenario() {
+  state.usedScenarioIds.add(state.activeScenario.id);
+  state.questionsAsked++;
+  state.chainIndex = 0;
+
+  // Hard Choice trigger points: rare, specific moments, not every question.
+  // Bridge dilemma fires once near the midpoint; fumie-style fires late.
+  const midpoint = Math.floor(state.maxQuestions * 0.45);
+  const lateTrigger = Math.floor(state.maxQuestions * 0.85);
+  if (state.questionsAsked === midpoint && !state.usedHardChoiceIds.has('hc_bridge')) {
+    state.pendingHardChoice = HARD_CHOICES.find(h=>h.id==='hc_bridge'); goTo('hard-choice-intro'); return;
+  }
+  if (state.questionsAsked === lateTrigger && !state.usedHardChoiceIds.has('hc_fumie')) {
+    state.pendingHardChoice = HARD_CHOICES.find(h=>h.id==='hc_fumie'); goTo('hard-choice-intro'); return;
+  }
+
+  if (shouldStopAssessment(state.confidence, state.questionsAsked, state.minQuestions, state.maxQuestions)) {
+    state.derivedLabels = computeDerivedLabels(state.traits, state.confidence);
+    selectGoal();
+    goTo('character-sheet');
+    return;
+  }
+
+  const next = pickNextScenario();
+  if (!next) {
+    // bank exhausted before reaching configured question count — stop gracefully
+    state.derivedLabels = computeDerivedLabels(state.traits, state.confidence);
+    selectGoal();
+    goTo('character-sheet');
+    return;
+  }
+  state.activeScenario = next;
+  render();
+}
+
+// ============================================================
+// GOAL SELECTION
+// ============================================================
+function selectGoal() {
+  const scored = GOALS.map(g => ({ g, s: g.match(state.traits) + (Math.random()*10-5) }))
+    .sort((a,b)=>b.s-a.s);
+  state.goal = scored[0].g;
+  state.objectives = state.goal.objectives.map(text => ({ text, status: 'pending' }));
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetGame() {
+  state.screen = 'landing';
+  state.name = '';
+  state.gender = null;
+  state.wantChoice = null;
+  state.kindChoice = null;
+  state.companion = null;
+  state.companionStatus = 'with_you';
+  state.companionStatusReason = null;
+  state.nickname = null;
+  state.bond = 0;
+  state.traits = newTraitState();
+  state.confidence = newConfidenceState();
+  state.contradiction = newContradictionState();
+  state.mental = { hope:65, anx:20 };
+  state.usedScenarioIds = new Set();
+  state.activeScenario = null;
+  state.chainIndex = 0;
+  state.questionsAsked = 0;
+  state.goal = null;
+  state.objectives = [];
+  state.lifeEvents = [];
+  state.eventIndex = 0;
+  state.eventLog = [];
+  state.lastDiceResult = null;
+  state.history = [];
+  state.derivedLabels = [];
+  state.lifestageQueue = [];
+  state.lifestageIndex = 0;
+  state.usedHardChoiceIds = new Set();
+  state.pendingAftermath = null;
+  state.pendingHardChoice = null;
+  state.pendingHardChoiceResult = null;
+  state.gameEndedEarly = false;
+  state.earlyEndingText = null;
+  goTo('landing');
+}
+
+// ============================================================
+// HARD CHOICE RESOLUTION
+// ============================================================
+function selectHardChoiceOption(optionIdx) {
+  const hc = state.pendingHardChoice;
+  const choice = hc.choices[optionIdx];
+  const classBonus = hardChoiceClassBonus(choice, state.traits);
+
+  if (choice.diceTarget === null) {
+    // certain-consequence path — no dice, the weight is entirely moral
+    applyImmediateHardChoiceResult(choice, choice.immediateText, choice.d);
+    return;
+  }
+
+  const statVal = state.traits[choice.diceStat] || 50;
+  const result = rollCheck(statVal, choice.diceTarget, 20, classBonus);
+  state.pendingHardChoiceResult = { choice, result, classBonus };
+  goTo('hard-choice-dice');
+}
+
+function resolveHardChoiceDice() {
+  const { choice, result } = state.pendingHardChoiceResult;
+  if (choice.outcomesOnDice) {
+    const outcome = choice.outcomesOnDice[result.outcome] || choice.outcomesOnDice['lose'];
+    applyImmediateHardChoiceResult(choice, outcome.text, outcome.d);
+  } else {
+    applyImmediateHardChoiceResult(choice, choice.immediateText, choice.d);
+  }
+}
+
+function applyImmediateHardChoiceResult(choice, text, delta) {
+  const hc = state.pendingHardChoice;
+  applyDelta(delta, []);
+  state.usedHardChoiceIds.add(hc.id);
+  state.history.push({ age: state.questionsAsked, title: hc.title, narrative: text, mentalSnapshot: { ...state.mental } });
+  state.eventLog.push({ title: hc.title, text });
+
+  if (choice.aftermathDelay && choice.aftermath) {
+    state.pendingAftermath = { title: hc.title, text: choice.aftermath };
+  }
+  state.pendingHardChoice = null;
+  state.pendingHardChoiceResult = null;
+  goTo('hard-choice-result');
+}
+
+function continueAfterHardChoice() {
+  if (state.pendingAftermath) {
+    goTo('hard-choice-aftermath');
+    return;
+  }
+  proceedToNextAfterHardChoice();
+}
+
+function acknowledgeAftermath() {
+  state.pendingAftermath = null;
+  proceedToNextAfterHardChoice();
+}
+
+function proceedToNextAfterHardChoice() {
+  if (shouldStopAssessment(state.confidence, state.questionsAsked, state.minQuestions, state.maxQuestions)) {
+    state.derivedLabels = computeDerivedLabels(state.traits, state.confidence);
+    selectGoal();
+    goTo('character-sheet');
+    return;
+  }
+  const next = pickNextScenario();
+  if (!next) {
+    state.derivedLabels = computeDerivedLabels(state.traits, state.confidence);
+    selectGoal();
+    goTo('character-sheet');
+    return;
+  }
+  state.activeScenario = next;
+  goTo('assessment');
+}
+// ============================================================
+// RENDER — PART 1: Landing -> Companion Reveal -> Settings
+// ============================================================
+
+function headerBar(showCharInfo, showLobby) {
+  if (['landing','name-input','death'].includes(state.screen)) return '';
+  return `
+    <div class="header-bar">
+      <span class="htitle">SECOND LIFE</span>
+      <div class="hbtns">
+        ${showCharInfo ? `<button class="hbtn" onclick="openCharacterInfoModal()">📊 Info</button>` : ''}
+        ${showLobby ? `<button class="hbtn" onclick="goTo('lobby')">🏠 Lobby</button>` : ''}
+        <button class="hbtn" onclick="confirmReset()">↺ Reset</button>
+      </div>
+    </div>`;
+}
+function confirmReset() {
+  if (confirm('Yakin ingin mengulang dari awal? Semua progres akan hilang.')) resetGame();
+}
+
+function renderLanding() {
+  return `
+  <div class="screen center">
+    <div style="font-size:11px;letter-spacing:4px;color:var(--accent);margin-bottom:14px;">✦</div>
+    <h1 class="title">SECOND LIFE</h1>
+    <p class="subtitle">Aldenreach — Simulasi Kehidupan Kedua</p>
+    <p class="tagline">Kamu pernah mati.</p>
+    <p class="tagline" style="margin-bottom:40px;max-width:280px;">Apa yang akan kamu lakukan dengan kehidupan keduamu?</p>
+    <button class="btn-primary" style="width:180px;" onclick="goTo('name-input')">Mulai</button>
+    <button class="btn-ghost center-text" style="width:180px;margin-top:6px;" onclick="goTo('settings')">⚙️ Pengaturan</button>
+    <p class="small-note" style="margin-top:36px;max-width:280px;">Terinspirasi konsep psikologi kepribadian. Bukan tes klinis atau IQ yang tervalidasi.</p>
+  </div>`;
+}
+
+function renderSettings() {
+  const classPaths = allClassPaths();
+  const grouped = {};
+  classPaths.forEach(p => { (grouped[p.family] = grouped[p.family] || []).push(p.evolution); });
+  return `
+  <div class="screen">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--accent);text-align:center;margin-bottom:20px;">PENGATURAN</p>
+    <div class="panel">
+      <p class="panel-title">JUMLAH PERTANYAAN</p>
+      <p class="small-note" style="margin-bottom:10px;">Sistem akan memilih pertanyaan secara adaptif dari basis data, berhenti lebih awal jika profilmu sudah cukup jelas, atau maksimal sejumlah ini.</p>
+      <p class="small-note" style="margin-bottom:10px;color:var(--warn);">Basis data saat ini punya ${FULL_SCENARIO_BANK.length} skenario total (${FULL_SCENARIO_BANK.filter(s=>!s.requiresCompanion&&!s.companionArchetype).length} bisa diakses tanpa teman). Kalau target melebihi itu, sesi akan berhenti begitu skenario yang tersedia habis.</p>
+      <div class="row-between" style="margin-bottom:6px;"><span class="rk">Minimum</span><span class="rv" id="minQVal">${state.minQuestions}</span></div>
+      <input type="range" min="15" max="45" value="${state.minQuestions}" oninput="state.minQuestions=parseInt(this.value); document.getElementById('minQVal').textContent=this.value; if(state.maxQuestions<state.minQuestions){state.maxQuestions=state.minQuestions; document.getElementById('maxQVal').textContent=state.maxQuestions; document.getElementById('maxQSlider').value=state.maxQuestions;}" style="width:100%;margin-bottom:14px;">
+      <div class="row-between" style="margin-bottom:6px;"><span class="rk">Maksimum</span><span class="rv" id="maxQVal">${state.maxQuestions}</span></div>
+      <input type="range" id="maxQSlider" min="20" max="45" value="${state.maxQuestions}" oninput="state.maxQuestions=parseInt(this.value); document.getElementById('maxQVal').textContent=this.value; if(state.minQuestions>state.maxQuestions){state.minQuestions=state.maxQuestions; document.getElementById('minQVal').textContent=state.minQuestions; }" style="width:100%;">
+    </div>
+    <div class="panel">
+      <p class="panel-title">BASIS DATA KELAS & EVOLUSI</p>
+      ${Object.entries(grouped).map(([fam, evos]) => `
+        <div style="margin-bottom:10px;">
+          <p style="font-size:13px;margin-bottom:4px;">${fam}</p>
+          ${evos.filter(e=>e).map(e => `<p class="small-note" style="margin-left:12px;">→ ${e}</p>`).join('')}
+        </div>`).join('')}
+    </div>
+    <div class="panel">
+      <p class="panel-title">BASIS DATA SKENARIO</p>
+      <p class="mid-note">${FULL_SCENARIO_BANK.length} skenario tersedia dalam basis data, dipilih secara adaptif berdasarkan seberapa jelas profil psikologismu sudah terbentuk di tiap dimensi.</p>
+      ${Object.entries(CLUSTERS).filter(([k])=>k!=='APPLIED').map(([k,v]) => `<p class="small-note">— ${v.label}</p>`).join('')}
+    </div>
+    <button class="btn-primary" onclick="goTo('landing')">Kembali</button>
+  </div>`;
+}
+
+function renderNameInput() {
+  return `
+  <div class="screen" style="justify-content:center;padding-top:60px;">
+    <label class="field-label">NAMAMU</label>
+    <input type="text" id="nameInput" placeholder="Dapa" value="${state.name}" oninput="state.name=this.value; syncContinueBtn()">
+    <label class="field-label">JENIS KELAMIN KARAKTER</label>
+    <div style="margin-bottom:24px;">
+      <span class="nickname-option ${state.gender==='male'?'selected':''}" onclick="state.gender='male'; render()">Laki-laki</span>
+      <span class="nickname-option ${state.gender==='female'?'selected':''}" onclick="state.gender='female'; render()">Perempuan</span>
+      <span class="nickname-option ${state.gender==='unspecified'?'selected':''}" onclick="state.gender='unspecified'; render()">Tidak disebutkan</span>
+    </div>
+    <button class="btn-primary" id="continueBtn" ${!state.name.trim()?'disabled':''} onclick="goTo('death')">Lanjut</button>
+  </div>`;
+}
+function syncContinueBtn() {
+  const btn = document.getElementById('continueBtn');
+  if (btn) btn.disabled = !state.name.trim();
+}
+
+function renderDeath() {
+  return `
+  <div class="screen center">
+    <div style="font-size:18px;color:var(--accent);margin-bottom:30px;">✦</div>
+    <p style="font-size:20px;letter-spacing:2px;margin-bottom:24px;">KAMU MATI.</p>
+    <p class="mid-note" style="margin-bottom:10px;">Tidak ada rasa sakit lagi.</p>
+    <p class="mid-note" style="margin-bottom:50px;">...tapi seseorang sedang menunggu.</p>
+    <button class="btn-primary" onclick="goTo('goddess')">Lanjut</button>
+  </div>`;
+}
+
+function renderGoddess() {
+  const options = [
+    { id:'wantStrong', label:'Aku ingin menjadi kuat.' },
+    { id:'wantPeace', label:'Aku ingin hidup dengan tenang.' },
+    { id:'wantCompanion', label:'Aku ingin seseorang menemaniku.' },
+    { id:'wantKnowledge', label:'Aku ingin memahami dunia ini.' },
+    { id:'wantUnsure', label:'Aku belum tahu.' },
+  ];
+  return `
+  <div class="screen" style="justify-content:center;">
+    <div class="panel" style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:22px;margin-bottom:14px;">✦</div>
+      <p class="mid-note">Kamu diberi satu kesempatan lagi untuk hidup.</p>
+    </div>
+    <p class="mid-note" style="margin-bottom:16px;">Sebelum kamu terlahir kembali — apa yang kamu inginkan dari kehidupan keduamu?</p>
+    ${options.map(o => `<button class="btn-ghost" onclick="chooseWant('${o.id}')">${o.label}</button>`).join('')}
+  </div>`;
+}
+function chooseWant(id) {
+  state.wantChoice = id;
+  if (id === 'wantCompanion') goTo('prayer-kind');
+  else goTo('assessment-intro');
+}
+
+function renderPrayerKind() {
+  const options = [
+    { id:'kindTrust', label:'Seseorang yang bisa kupercaya' },
+    { id:'kindStrong', label:'Seseorang yang kuat' },
+    { id:'kindSmart', label:'Seseorang yang cerdas' },
+    { id:'kindFunny', label:'Seseorang yang membuat hidup tidak membosankan' },
+    { id:'kindUnderstand', label:'Seseorang yang memahami diriku' },
+    { id:'kindDontCare', label:'Terserah, kejutkan aku' },
+    { id:'kindAlone', label:'Sebenarnya... aku ingin sendiri saja.' },
+  ];
+  return `
+  <div class="screen" style="justify-content:center;">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--accent);margin-bottom:10px;text-align:center;">✦ Doamu telah didengar ✦</p>
+    <p class="mid-note" style="margin-bottom:20px;text-align:center;">Orang seperti apa yang kamu inginkan di sisimu?</p>
+    ${options.map(o => `<button class="btn-ghost" onclick="choosePrayerKind('${o.id}')">${o.label}</button>`).join('')}
+  </div>`;
+}
+function choosePrayerKind(id) {
+  state.kindChoice = id;
+  if (id === 'kindAlone') {
+    state.companion = null;
+    goTo('assessment-intro');
+  } else {
+    goTo('rolling');
+    setTimeout(() => { rollCompanion(); goTo('companion-reveal'); }, 2400);
+  }
+}
+
+function renderRolling() {
+  return `
+  <div class="screen center">
+    <div style="font-size:30px;color:var(--accent);margin-bottom:20px;animation:pulseStar 1.2s ease-in-out infinite;">✦</div>
+    <style>@keyframes pulseStar { 0%,100%{opacity:0.35;transform:scale(0.85);} 50%{opacity:1;transform:scale(1.15);} }</style>
+    <p class="mid-note">Kamu memejamkan mata dan memanjatkan doa...</p>
+  </div>`;
+}
+
+let revealStage = 0;
+function renderCompanionReveal() {
+  const c = state.companion;
+  setTimeout(() => {
+    if (state.screen === 'companion-reveal' && revealStage < 3) { revealStage++; render(); }
+  }, 550);
+  return `
+  <div class="screen center">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--accent);margin-bottom:20px;">✦ SEBUAH JIWA MENJAWAB DOAMU ✦</p>
+    <div class="companion-card">
+      <div class="cc-name">${revealStage >= 1 ? c.name : '???'}</div>
+      ${revealStage >= 2 ? `<div class="cc-archetype">${RELATIONSHIP_ARCHETYPE_LABEL[c.archetype]}</div>` : '<div class="cc-archetype">&nbsp;</div>'}
+      ${revealStage >= 3 ? `
+        <p class="mid-note" style="margin-bottom:14px;">${c.desc}</p>
+        <div class="divider"></div>
+        <div style="text-align:left;margin-top:12px;">
+          ${Object.entries(c.stats).map(([k,v]) => `
+            <div class="stat-row">
+              <div class="stat-label">${TRAIT_LABELS[k]||k}</div>
+              <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${v}%"></div></div>
+              <div class="stat-val">${v}</div>
+            </div>`).join('')}
+        </div>
+      ` : `<p class="small-note">mengungkap jati diri...</p>`}
+    </div>
+    ${revealStage >= 3 ? `<button class="btn-primary" onclick="revealStage=0; goTo('nickname-picker')">Lanjut</button>` : ''}
+  </div>`;
+}
+
+function renderNicknamePicker() {
+  const c = state.companion;
+  return `
+  <div class="screen" style="justify-content:center;">
+    <p style="font-size:14px;text-align:center;margin-bottom:6px;">Kamu akan memanggilnya apa?</p>
+    <p class="small-note" style="text-align:center;margin-bottom:20px;">Panggilan bisa mempengaruhi kedekatan kalian — tergantung kepribadiannya.</p>
+    <div style="text-align:center;margin-bottom:20px;">
+      ${NICKNAME_PRESETS.map(p => `<span class="nickname-option" onclick="pickNickname('${p.id}')">${p.label(c.name)}</span>`).join('')}
+    </div>
+    <div class="panel">
+      <p class="small-note">${c.name} — ${RELATIONSHIP_ARCHETYPE_LABEL[c.archetype]}. ${c.nicknameTolerance < 40 ? 'Terlihat cukup dewasa dan berjaga jarak; panggilan yang terlalu akrab mungkin terasa aneh baginya di awal.' : c.nicknameTolerance > 65 ? 'Terlihat santai dan mudah akrab; kemungkinan besar tidak keberatan dipanggil apa saja.' : 'Belum jelas bagaimana dia akan bereaksi terhadap panggilan yang terlalu personal.'}</p>
+    </div>
+  </div>`;
+}
+function pickNickname(presetId) {
+  const preset = NICKNAME_PRESETS.find(p => p.id === presetId);
+  const mod = preset.affinityMod(state.companion.nicknameTolerance);
+  state.nickname = preset.label(state.companion.name);
+  state.bond = Math.max(0, Math.min(100, state.bond + mod));
+  const c = state.companion;
+  let reaction;
+  if (mod >= 5) reaction = `${c.name} tersenyum mendengarnya — panggilan itu terasa pas.`;
+  else if (mod > 0) reaction = `${c.name} tidak keberatan.`;
+  else if (mod === 0) reaction = `${c.name} tidak bereaksi khusus terhadap itu.`;
+  else if (mod > -8) reaction = `${c.name} mengangkat alis, sedikit canggung, tapi membiarkannya.`;
+  else reaction = `${c.name} terlihat jelas tidak nyaman. "...bisa kita bicarakan nama panggilan lain?"`;
+  showToast(`Ikatan awal ${mod>=0?'+':''}${mod}`, mod >= 0);
+  setTimeout(() => { alert(reaction); goTo('assessment-intro'); }, 300);
+}
+
+function renderAssessmentIntro() {
+  return `
+  <div class="screen center">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--accent);margin-bottom:16px;">ALDENREACH</p>
+    <p class="mid-note" style="margin-bottom:30px;max-width:300px;">Kamu membuka mata di sebuah dunia yang terasa aneh dengan caranya sendiri — seolah setiap makhluk hidup di sini membawa semacam catatan tersembunyi tentang siapa mereka. Kamu akan segera tahu apa artinya itu bagimu.</p>
+    <button class="btn-primary" onclick="startAssessment()">Mulai Perjalanan</button>
+  </div>`;
+}
+// ============================================================
+// RENDER — PART 2: Assessment -> Character Sheet
+// ============================================================
+
+let pendingDiceResult = null;
+let timerInterval = null;
+let timerValue = 15;
+
+function renderAssessment() {
+  const node = getCurrentNode();
+  if (!node) { finishScenario(); return renderAssessment(); }
+  const progress = Math.min(100, (state.questionsAsked / state.maxQuestions) * 100);
+
+  if (node.dice) return renderDiceQuestion(node, progress);
+
+  return `
+  ${headerBar(true, false)}
+  <div class="screen">
+    <div style="margin-bottom:20px;">
+      <div class="row-between" style="margin-bottom:6px;">
+        <span style="font-size:10.5px;letter-spacing:1.5px;color:var(--accent);">ASESMEN</span>
+        <span style="font-size:10.5px;color:var(--accent-soft);">${state.questionsAsked+1} / ~${state.maxQuestions}</span>
+      </div>
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${progress}%"></div></div>
+    </div>
+    ${node.timed ? renderTimer() : ''}
+    <p style="font-size:15.5px;line-height:1.7;margin-bottom:24px;">${node.text}</p>
+    <div id="choicesContainer">
+      ${node.choices.map((c, i) => `<button class="btn-ghost" onclick="handleScenarioAnswer(${i})">${c.text}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderTimer() {
+  timerValue = 15;
+  return `<div style="text-align:center;margin-bottom:14px;">
+    <span id="timerBadge" style="font-size:10.5px;color:var(--danger);letter-spacing:1px;border:1px solid rgba(232,93,93,0.4);border-radius:6px;padding:3px 10px;">Keputusan cepat · ${timerValue}d</span>
+  </div>`;
+}
+function startTimerIfNeeded() {
+  clearInterval(timerInterval);
+  const node = getCurrentNode();
+  if (node && node.timed && !node.dice) {
+    timerValue = 15;
+    timerInterval = setInterval(() => {
+      timerValue--;
+      const badge = document.getElementById('timerBadge');
+      if (badge) badge.textContent = `Keputusan cepat · ${timerValue}d`;
+      if (timerValue <= 0) { clearInterval(timerInterval); handleScenarioAnswer(Math.floor(Math.random()*node.choices.length)); }
+    }, 1000);
+  }
+}
+
+function handleScenarioAnswer(choiceIdx) {
+  clearInterval(timerInterval);
+  const node = getCurrentNode();
+  answerScenario(choiceIdx, node);
+  startTimerIfNeeded();
+}
+
+function renderDiceQuestion(node, progress) {
+  const result = pendingDiceResult;
+  const dice = node.dice;
+  const statVal = state.traits[dice.stat] || 50;
+  const assistAllowed = !!dice.allowsCompanionHelp;
+  const assistBonus = companionAssistBonus(state.companion, state.bond, dice.stat, assistAllowed);
+  const auto = !result ? autoResolveCheck(statVal, dice.target, 20, assistBonus) : null;
+
+  const assistNote = state.companion && assistAllowed
+    ? `<p class="small-note" style="margin-top:6px;">${state.nickname||state.companion.name} bisa membantu di sini${assistBonus>0?` (+${assistBonus})`:''}.</p>`
+    : (state.companion ? `<p class="small-note" style="margin-top:6px;">Ini harus kamu hadapi sendiri.</p>` : '');
+
+  if (auto) {
+    return `
+    ${headerBar(true, false)}
+    <div class="screen">
+      <div style="margin-bottom:20px;"><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${progress}%"></div></div></div>
+      <p style="font-size:15.5px;line-height:1.7;margin-bottom:16px;">${node.text}</p>
+      <div class="panel" style="text-align:center;">
+        <p class="small-note" style="margin-bottom:10px;">${TRAIT_LABELS[dice.stat]||dice.stat} kamu (${statVal}${assistBonus>0?` +${assistBonus}`:''}) jelas ${auto.outcome==='crit_win'?'jauh melampaui':'jauh di bawah'} yang dibutuhkan (target ${dice.target}). Tidak perlu dadu.</p>
+        <p class="roll-outcome ${OUTCOME_LABEL[auto.outcome].class}">${OUTCOME_LABEL[auto.outcome].text}</p>
+        ${assistNote}
+      </div>
+      <button class="btn-primary" onclick="pendingDiceResult={outcome:'${auto.outcome}',statValue:${statVal},assistBonus:${assistBonus},total:${auto.total},target:${dice.target},roll:null}; resolveDiceScenario();">Lanjut</button>
+    </div>`;
+  }
+
+  return `
+  ${headerBar(true, false)}
+  <div class="screen">
+    <div style="margin-bottom:20px;"><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${progress}%"></div></div></div>
+    <p style="font-size:15.5px;line-height:1.7;margin-bottom:16px;">${node.text}</p>
+    <div class="panel" style="text-align:center;">
+      <p class="small-note" style="margin-bottom:10px;">Lemparan dadu: <b style="color:var(--text);">${TRAIT_LABELS[dice.stat]||dice.stat} (${statVal})</b>${assistBonus>0?` <span style="color:var(--success);">+${assistBonus}</span>`:''} + 1d20, target <b style="color:var(--text);">${dice.target}</b></p>
+      ${assistNote}
+      <div class="dice-box"><div class="die" id="dieEl">${result ? result.roll : '?'}</div></div>
+      ${!result ? `<button class="btn-primary" id="rollBtn" onclick="performDiceRoll(${assistBonus})">Lempar Dadu</button>` : `
+        <p class="roll-result-text">Total: ${result.statValue}${result.assistBonus?` +${result.assistBonus}`:''} + ${result.roll} = ${result.total} (target ${result.target})</p>
+        <p class="roll-outcome ${OUTCOME_LABEL[result.outcome].class}">${OUTCOME_LABEL[result.outcome].text}</p>
+      `}
+    </div>
+    ${result ? `<button class="btn-primary" onclick="resolveDiceScenario()">Lanjut</button>` : ''}
+  </div>`;
+}
+
+function performDiceRoll(assistBonus) {
+  const node = getCurrentNode();
+  const die = document.getElementById('dieEl');
+  const btn = document.getElementById('rollBtn');
+  if (btn) btn.disabled = true;
+  die.classList.add('rolling');
+  let ticks = 0;
+  const anim = setInterval(() => {
+    die.textContent = rollDice(20);
+    ticks++;
+    if (ticks > 12) {
+      clearInterval(anim);
+      pendingDiceResult = rollCheck(state.traits[node.dice.stat] || 50, node.dice.target, 20, assistBonus || 0);
+      render();
+    }
+  }, 70);
+}
+
+function resolveDiceScenario() {
+  const node = getCurrentNode();
+  const result = pendingDiceResult;
+  const outcome = node.outcomes[result.outcome === 'crit_lose' ? 'lose' : result.outcome];
+  applyDelta(outcome.d, state.activeScenario.measures);
+  pendingDiceResult = null;
+  finishScenario();
+}
+
+// ============================================================
+// CHARACTER INFO MODAL
+// ============================================================
+function openCharacterInfoModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  const labels = computeDerivedLabels(state.traits, state.confidence);
+  overlay.innerHTML = `
+    <div class="modal-sheet">
+      <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+      <p style="font-size:16px;margin-bottom:4px;">${state.name || 'Karaktermu'}</p>
+      <p class="small-note" style="margin-bottom:16px;">Info karakter saat ini (progres sementara)</p>
+      ${labels.length ? `
+        <div class="panel">
+          <p class="panel-title">POLA KEPRIBADIAN TERDETEKSI</p>
+          ${labels.map(l => `<p class="mid-note" style="margin-bottom:6px;"><b>${l.label}</b> — ${l.desc}</p>`).join('')}
+        </div>` : ''}
+      ${Object.entries(CLUSTERS).filter(([k])=>k!=='APPLIED').map(([catKey, cat]) => `
+        <div class="panel">
+          <p class="panel-title">${cat.label.toUpperCase()}</p>
+          ${cat.traits.map(k => statRowHtml(TRAIT_LABELS[k], state.traits[k])).join('')}
+        </div>`).join('')}
+      ${state.companion ? `
+        <div class="panel">
+          <p class="panel-title">TEMAN — ${state.nickname || state.companion.name}</p>
+          <p class="small-note">Ikatan: ${state.bond}/100 — ${bondStageFor(state.bond).label}</p>
+        </div>` : ''}
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+// ============================================================
+// CHARACTER SHEET
+// ============================================================
+function renderCharacterSheet() {
+  const classResult = computeClass(state.traits);
+  const weaponResult = computeWeapon(state.traits);
+  const stage = state.companion ? bondStageFor(state.bond) : null;
+
+  return `
+  ${headerBar(false, false)}
+  <div class="screen">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--accent);text-align:center;margin-bottom:4px;">PROFIL JIWA</p>
+    <p style="font-size:20px;text-align:center;margin-bottom:24px;">${state.name}</p>
+
+    <div class="panel" style="text-align:center;">
+      <p class="small-note" style="margin-bottom:4px;">KELAS</p>
+      <p style="font-size:18px;margin-bottom:2px;">${classResult.primary.name}</p>
+      ${classResult.evolution ? `<p style="font-size:12px;color:var(--accent);margin-bottom:10px;">→ ${classResult.evolution.name}</p>` : ''}
+      <div class="divider"></div>
+      <div style="text-align:left;margin-top:10px;">
+        <p class="small-note" style="letter-spacing:1px;margin-bottom:6px;">MENGAPA</p>
+        <p class="mid-note">${classResult.evolution ? classResult.evolution.reason : classResult.primary.reason}</p>
+      </div>
+      ${classResult.almostReached.length ? `
+        <div style="text-align:left;margin-top:10px;padding-top:10px;border-top:1px solid rgba(139,127,240,0.15);">
+          <p class="small-note" style="letter-spacing:1px;margin-bottom:6px;">JALUR LAIN YANG HAMPIR TERCAPAI</p>
+          ${classResult.almostReached.map(e => `<p style="font-size:11.5px;color:var(--text-dim);">${e.name}</p>`).join('')}
+        </div>` : ''}
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">AFINITAS SENJATA</p>
+      <p style="font-size:15px;margin-bottom:10px;">${weaponResult.weapon.name}</p>
+      ${statRowHtml('Afinitas', weaponResult.affinity)}
+      ${statRowHtml('Kemampuan', weaponResult.skill)}
+      ${statRowHtml('Potensi', weaponResult.potential)}
+    </div>
+
+    ${state.derivedLabels.length ? `
+    <div class="panel">
+      <p class="panel-title">POLA KEPRIBADIAN</p>
+      ${state.derivedLabels.map(l => `<p class="mid-note" style="margin-bottom:8px;"><b>${l.label}</b> — ${l.desc}</p>`).join('')}
+    </div>` : ''}
+
+    ${Object.entries(CLUSTERS).filter(([k])=>k!=='APPLIED').map(([catKey, cat]) => `
+      <div class="panel">
+        <p class="panel-title">${cat.label.toUpperCase()}</p>
+        ${cat.traits.map(k => statRowHtml(TRAIT_LABELS[k], state.traits[k])).join('')}
+      </div>`).join('')}
+
+    <div class="panel">
+      <p class="panel-title">TUJUAN HIDUP</p>
+      <p style="font-size:15px;margin-bottom:10px;">${state.goal.label}</p>
+      <p class="small-note" style="margin-bottom:8px;">OBJEKTIF UTAMA:</p>
+      ${state.objectives.map((o,i) => `<p class="mid-note" style="margin-bottom:4px;">${i+1}. ${o.text}</p>`).join('')}
+    </div>
+
+    ${state.companion ? `
+      <div class="panel">
+        <p class="panel-title">TEMAN</p>
+        <p style="font-size:15px;margin-bottom:2px;">${state.nickname || state.companion.name}</p>
+        <p class="small-note" style="margin-bottom:12px;">${RELATIONSHIP_ARCHETYPE_LABEL[state.companion.archetype]}</p>
+        <div style="margin-bottom:10px;">
+          <p style="font-size:11px;color:var(--accent-soft);margin-bottom:4px;">Hubungan: ${stage.label}</p>
+          <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${state.bond}%"></div></div>
+        </div>
+        ${Object.entries(state.companion.stats).map(([k,v]) => statRowHtml(TRAIT_LABELS[k]||k, v)).join('')}
+      </div>` : ''}
+
+    <div style="margin-top:8px;">
+      <button class="btn-primary" onclick="goTo('narrative')">Lanjutkan</button>
+    </div>
+  </div>`;
+}
+
+function statRowHtml(label, value) {
+  return `
+    <div class="stat-row">
+      <div class="stat-label">${label}</div>
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${Math.round(value)}%"></div></div>
+      <div class="stat-val">${Math.round(value)}</div>
+    </div>`;
+}
+// ============================================================
+// RENDER — LIFESTAGE & HARD CHOICE SCREENS
+// ============================================================
+
+function renderLifestage() {
+  const node = getCurrentLifestageNode();
+  if (!node) { beginMainAssessment(); return renderAssessment(); }
+  const s = state.lifestageQueue[state.lifestageIndex];
+  const stageLabel = s.lifeStage === 'childhood' ? 'MASA KECIL' : 'MASA REMAJA';
+  const progress = (state.lifestageIndex / state.lifestageQueue.length) * 100;
+  return `
+  ${headerBar(false, false)}
+  <div class="screen">
+    <div style="margin-bottom:20px;">
+      <p style="font-size:10.5px;letter-spacing:1.5px;color:var(--accent);text-align:center;margin-bottom:8px;">${stageLabel}</p>
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${progress}%"></div></div>
+    </div>
+    <p style="font-size:15.5px;line-height:1.7;margin-bottom:24px;">${node.text}</p>
+    <div>
+      ${node.choices.map((c,i) => `<button class="btn-ghost" onclick="answerLifestage(${i})">${c.text}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// HARD CHOICE FLOW
+// ============================================================
+function renderHardChoiceIntro() {
+  const hc = state.pendingHardChoice;
+  return `
+  <div class="screen center">
+    <p style="font-size:11px;letter-spacing:3px;color:var(--danger);margin-bottom:20px;">═══ MOMEN YANG MENENTUKAN ═══</p>
+    <p style="font-size:17px;margin-bottom:20px;">${hc.title}</p>
+    <p class="mid-note" style="text-align:left;margin-bottom:24px;">${hc.setup}</p>
+    <div class="panel" style="text-align:left;width:100%;">
+      <p class="small-note" style="letter-spacing:1px;margin-bottom:8px;">YANG DIPERTARUHKAN</p>
+      ${Object.entries(hc.values).map(([k,v]) => `<p class="mid-note" style="margin-bottom:6px;">• ${v}</p>`).join('')}
+    </div>
+    <div style="margin-top:20px;width:100%;">
+      ${hc.choices.map((c,i) => `<button class="btn-ghost" onclick="selectHardChoiceOption(${i})" style="border-color:rgba(232,93,93,0.35);">${c.text}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderHardChoiceDice() {
+  const { choice, result } = state.pendingHardChoiceResult;
+  return `
+  <div class="screen center">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--danger);margin-bottom:20px;">HASIL BELUM PASTI</p>
+    <div class="panel" style="text-align:center;width:100%;">
+      <p class="mid-note" style="margin-bottom:14px;">Kamu sudah memutuskan. Sekarang tinggal melihat apakah keberuntungan dan kemampuanmu cukup.</p>
+      <div class="dice-box"><div class="die">${result.roll !== null ? result.roll : '—'}</div></div>
+      <p class="roll-result-text">Total: ${result.statValue}${result.assistBonus?` +${result.assistBonus} (kecenderungan alami)`:''} + ${result.roll} = ${result.total} (target ${result.target})</p>
+      <p class="roll-outcome ${OUTCOME_LABEL[result.outcome].class}">${OUTCOME_LABEL[result.outcome].text}</p>
+    </div>
+    <button class="btn-primary" onclick="resolveHardChoiceDice()">Lihat Akibatnya</button>
+  </div>`;
+}
+
+function renderHardChoiceResult() {
+  const lastEvent = state.eventLog[state.eventLog.length - 1];
+  return `
+  <div class="screen center">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--accent);margin-bottom:20px;">${lastEvent.title.toUpperCase()}</p>
+    <div class="panel" style="text-align:left;width:100%;">
+      <p class="mid-note">${lastEvent.text}</p>
+    </div>
+    <button class="btn-primary" onclick="continueAfterHardChoice()">Lanjut</button>
+  </div>`;
+}
+
+function renderHardChoiceAftermath() {
+  const a = state.pendingAftermath;
+  return `
+  <div class="screen center">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--text-dim);margin-bottom:24px;">BEBERAPA HARI KEMUDIAN</p>
+    <div class="panel" style="text-align:left;width:100%;background:rgba(10,8,18,0.7);">
+      <p class="mid-note" style="font-style:italic;line-height:1.8;">${a.text}</p>
+    </div>
+    <button class="btn-primary" onclick="acknowledgeAftermath()" style="margin-top:20px;">Bawa Ini Bersamamu</button>
+  </div>`;
+}
+// ============================================================
+// RENDER — PART 3: Narrative -> Lobby -> Ending -> Dispatcher
+// ============================================================
+
+function buildNarrative() {
+  const classResult = computeClass(state.traits);
+  const t = state.traits;
+  const p1 = `Kamu bukan orang yang luar biasa berbakat di kehidupan pertamamu. Tapi sesuatu di Aldenreach memperhatikan pola-pola kecil dalam caramu mengambil keputusan — sesuatu yang bahkan tidak kamu sadari sendiri.`;
+  const p2 = t.RISK > 60
+    ? `Kamu cenderung bergerak dulu, berpikir belakangan — bukan karena ceroboh, tapi karena kamu percaya keraguan sering lebih berbahaya daripada kesalahan.`
+    : `Kamu cenderung mengamati dulu sebelum bertindak, bukan karena takut, tapi karena kamu tahu satu langkah yang tepat lebih berharga daripada sepuluh langkah yang terburu-buru.`;
+  const p3 = state.companion
+    ? `Kamu memohon agar tidak sendirian, dan ${state.nickname || state.companion.name} menjawab panggilan itu. Kalian belum saling kenal, tapi benang yang menghubungkan kalian sudah mulai terjalin sejak detik pertama.`
+    : `Kamu memilih berjalan sendiri. Bukan karena tidak butuh siapa pun — tapi karena kamu ingin tahu dulu siapa dirimu tanpa bayang-bayang orang lain.`;
+  const p4 = `Sesuatu dalam dirimu sudah condong ke arah ${classResult.primary.name}. Bukan karena kamu memilihnya. Karena itulah yang selalu ada dalam dirimu, menunggu dunia yang tepat untuk menampakkannya.`;
+  const p5 = `Dan sekarang, dengan tujuan "${state.goal.label}" tertanam dalam dirimu, kehidupan keduamu sesungguhnya baru akan dimulai.`;
+  return [p1, p2, p3, p4, p5];
+}
+
+function renderNarrative() {
+  const narrative = buildNarrative();
+  return `
+  ${headerBar(true, false)}
+  <div class="screen">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--accent);text-align:center;margin-bottom:20px;">KEHIDUPAN KEDUAMU</p>
+    <div style="font-size:14.5px;line-height:1.85;color:var(--text-mid);">
+      ${narrative.map(p => `<p style="margin-bottom:16px;">${p}</p>`).join('')}
+    </div>
+    <button class="btn-primary" onclick="goTo('ending')">Lihat Kesimpulan Perjalanan Ini</button>
+  </div>`;
+}
+
+// ============================================================
+// ENDING
+// ============================================================
+function buildClosingPhilosophy(traits, derivedLabels, hardChoicesMade, companion) {
+  const paragraphs = [];
+  paragraphs.push(`Kalau ada satu hal yang bisa dikatakan dengan pasti tentang siapa dirimu setelah semua ini, itu bukan angka-angka pada lembar statusmu. Itu adalah pola — cara kamu, berulang kali, memilih ketika tidak ada yang benar-benar memaksamu untuk memilih dengan cara tertentu.`);
+
+  if (hardChoicesMade.length > 0) {
+    const chose_dark = hardChoicesMade.some(h => h.sacrificedHonor);
+    if (chose_dark) {
+      paragraphs.push(`Ada momen-momen ketika logika tampak begitu meyakinkan, begitu bersih, sampai kamu nyaris lupa bahwa nurani tidak pernah benar-benar terikat pada logika. Kamu bertindak, dan dunia tidak runtuh karenanya. Tapi sesuatu yang lebih pelan berubah — cara kamu tidur di malam hari, cara kamu mengingat wajah-wajah tertentu. Itu bukan hukuman dari luar. Itu adalah harga yang selalu ada, terlepas dari apakah siapa pun tahu.`);
+    } else {
+      paragraphs.push(`Ketika dihadapkan pada pilihan yang tidak punya jawaban bersih, kamu berulang kali memilih untuk mempertahankan sesuatu yang tidak bisa diukur dengan hasil akhir. Dunia tidak selalu menghargai itu. Tapi kamu tetap melakukannya — bukan karena itu mudah, tapi karena rasanya seperti satu-satunya cara kamu bisa terus mengenali dirimu sendiri di cermin.`);
+    }
+  }
+
+  if (traits.ANX > 60) {
+    paragraphs.push(`Kamu membawa lebih banyak beban di pikiranmu daripada yang pernah kamu tunjukkan pada orang lain. Itu bukan kelemahan — itu tanda bahwa kamu memperhatikan konsekuensi lebih dalam dari kebanyakan orang, meski kadang harganya adalah ketenangan yang tidak pernah benar-benar kamu miliki.`);
+  } else if (traits.RES > 65) {
+    paragraphs.push(`Entah bagaimana, hal-hal yang seharusnya menghancurkan orang lain hanya membentukmu ulang, sedikit demi sedikit, menjadi seseorang yang lebih sulit dipatahkan. Itu bukan berarti kamu tidak pernah terluka. Itu berarti kamu belajar bagaimana caranya terus berjalan sambil membawa lukanya.`);
+  }
+
+  if (companion) {
+    paragraphs.push(`Dan sepanjang perjalanan ini, ada seseorang yang menyaksikan semuanya — bukan sebagai penonton, tapi sebagai orang yang ikut menanggung sebagian dari pilihan-pilihanmu. Kehadiran itu, lebih dari yang kamu sadari, ikut membentuk siapa kamu jadinya, dengan cara yang tidak pernah tercatat di lembar status manapun.`);
+  }
+
+  paragraphs.push(`Pada akhirnya, mungkin pertanyaan yang paling jujur bukan "apakah kamu orang baik". Pertanyaan yang lebih jujur adalah: ketika dunia tidak memberimu pilihan yang bersih, apa yang kamu pilih untuk korbankan — dan bisakah kamu hidup dengan pengorbanan itu? Kamu sudah menjawabnya. Berkali-kali. Dengan caramu sendiri.`);
+
+  return paragraphs;
+}
+
+function renderEnding() {
+  const classResult = computeClass(state.traits);
+  const lifespan = computeLifespan(state.traits, !!state.companion);
+  const goalProgress = computeGoalProgress(state.traits, state.goal.id);
+  const outcomeTitle = computeOutcomeTitle(state.traits);
+  const family = computeFamilyOutcome(state.traits, state.companion, state.bond, lifespan);
+  const stage = state.companion ? bondStageFor(state.bond) : null;
+  const hardChoicesMade = state.eventLog.filter(e => HARD_CHOICES.some(h => h.title === e.title));
+  const closingPhilosophy = buildClosingPhilosophy(state.traits, state.derivedLabels, hardChoicesMade, state.companion);
+
+  return `
+  <div class="screen">
+    <p style="font-size:11px;letter-spacing:2px;color:var(--accent);text-align:center;margin-bottom:4px;">KEHIDUPANMU</p>
+    <p style="font-size:28px;text-align:center;margin-bottom:2px;">${lifespan}</p>
+    <p class="small-note" style="text-align:center;margin-bottom:24px;">TAHUN</p>
+
+    <div class="panel">
+      ${rowHtml('Kelas', classResult.primary.name)}
+      ${classResult.evolution ? rowHtml('→', classResult.evolution.name) : ''}
+      ${rowHtml('Teman', state.companion ? `${state.nickname||state.companion.name} (${stage.label})` : 'Tidak ada')}
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">KEHIDUPAN PRIBADI</p>
+      ${rowHtml('Status', family.partnered ? 'Menikah / Berpasangan' : 'Lajang')}
+      ${family.partnered && family.partnerIsCompanion && state.companion ? rowHtml('Pasangan', state.nickname||state.companion.name) : ''}
+      ${rowHtml('Anak', family.children)}
+      ${family.grandchildren > 0 ? rowHtml('Cucu', family.grandchildren) : ''}
+    </div>
+
+    ${state.derivedLabels.length ? `
+    <div class="panel">
+      <p class="panel-title">SIAPA DIRIMU DI AKHIR</p>
+      ${state.derivedLabels.map(l => `<p class="mid-note" style="margin-bottom:6px;"><b>${l.label}</b> — ${l.desc}</p>`).join('')}
+    </div>` : ''}
+
+    <div class="panel">
+      <p class="panel-title">TUJUAN HIDUP</p>
+      ${statRowHtml(state.goal.label, goalProgress)}
+    </div>
+
+    <div class="panel" style="text-align:center;">
+      <p class="small-note" style="margin-bottom:8px;">AKHIR KEHIDUPAN</p>
+      <p style="font-size:17px;font-style:italic;">${outcomeTitle.text}</p>
+    </div>
+
+    <div class="panel" style="background:rgba(10,8,18,0.65);">
+      <p class="panel-title">PERENUNGAN TERAKHIR</p>
+      ${closingPhilosophy.map(p => `<p class="mid-note" style="margin-bottom:14px;line-height:1.8;font-style:italic;">${p}</p>`).join('')}
+    </div>
+
+    <button class="btn-primary" onclick="resetGame()">Hidup Lagi</button>
+  </div>`;
+}
+
+function rowHtml(label, value) {
+  return `<div class="row-between"><span class="rk">${label}</span><span class="rv">${value}</span></div>`;
+}
+
+// ============================================================
+// MAIN DISPATCHER
+// ============================================================
+function render() {
+  const app = document.getElementById('app');
+  if (!app) return;
+  let html = '';
+  switch (state.screen) {
+    case 'landing': html = renderLanding(); break;
+    case 'settings': html = renderSettings(); break;
+    case 'name-input': html = renderNameInput(); break;
+    case 'death': html = renderDeath(); break;
+    case 'goddess': html = renderGoddess(); break;
+    case 'prayer-kind': html = renderPrayerKind(); break;
+    case 'rolling': html = renderRolling(); break;
+    case 'companion-reveal': html = renderCompanionReveal(); break;
+    case 'nickname-picker': html = renderNicknamePicker(); break;
+    case 'assessment-intro': html = renderAssessmentIntro(); break;
+    case 'lifestage': html = renderLifestage(); break;
+    case 'assessment': html = renderAssessment(); break;
+    case 'hard-choice-intro': html = renderHardChoiceIntro(); break;
+    case 'hard-choice-dice': html = renderHardChoiceDice(); break;
+    case 'hard-choice-result': html = renderHardChoiceResult(); break;
+    case 'hard-choice-aftermath': html = renderHardChoiceAftermath(); break;
+    case 'character-sheet': html = renderCharacterSheet(); break;
+    case 'narrative': html = renderNarrative(); break;
+    case 'ending': html = renderEnding(); break;
+    default: html = renderLanding();
+  }
+  app.innerHTML = html;
+  if (state.screen === 'assessment') startTimerIfNeeded();
+}
+
+document.addEventListener('DOMContentLoaded', () => { render(); });
+
+</script>
+</body>
+</html>
